@@ -26,6 +26,23 @@
     "plugins": [
       "expo-router",
       [
+        "expo-font",
+        {
+          "fonts": [
+            "./assets/fonts/league-spartan/LeagueSpartan-Bold.ttf",
+            "./assets/fonts/league-spartan/LeagueSpartan-Medium.ttf",
+            "./assets/fonts/league-spartan/LeagueSpartan-Regular.ttf",
+            "./assets/fonts/league-spartan/LeagueSpartan-SemiBold.ttf",
+            "./assets/fonts/cormorant-garamond/CormorantGaramond-Italic.ttf",
+            "./assets/fonts/cormorant-garamond/CormorantGaramond-Regular.ttf",
+            "./assets/fonts/plus-jakarta-sans/PlusJakartaSans-Bold.ttf",
+            "./assets/fonts/plus-jakarta-sans/PlusJakartaSans-Medium.ttf",
+            "./assets/fonts/plus-jakarta-sans/PlusJakartaSans-Regular.ttf",
+            "./assets/fonts/plus-jakarta-sans/PlusJakartaSans-SemiBold.ttf"
+          ]
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "backgroundColor": "#208AEF",

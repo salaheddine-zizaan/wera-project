@@ -1,0 +1,45 @@
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "tailwindcss/utilities.css";
+
+@import "nativewind/theme";
+
+@theme {
+  --color-canvas: #faf9f6;
+  --color-surface: #ffffff;
+  --color-surface-secondary: #f5f3ef;
+  --color-muted: #ece9e2;
+  --color-text-primary: #111111;
+  --color-text-secondary: #6b6b6b;
+  --color-border-subtle: #ece9e2;
+  --color-border-default: #ddd8cf;
+  --color-border-strong: #111111;
+  --color-border-focus: #1a2948;
+  --color-navy: #1a2948;
+  --color-editorial-dark: #111111;
+  --color-warm-accent: #b1896b;
+  --color-success: #2e7045;
+  --color-success-surface: #eaf4ec;
+  --color-warning: #a6651e;
+  --color-warning-surface: #fff4e6;
+  --color-error: #b53335;
+  --color-error-surface: #fcebed;
+  --color-info: #2f6fb3;
+  --color-info-surface: #eaf1fb;
+
+  --font-display: "WeraLeagueSpartan-Bold";
+  --font-editorial: "WeraCormorantGaramond-Italic";
+  --font-ui: "WeraPlusJakartaSans-Regular";
+  --font-ui-medium: "WeraPlusJakartaSans-Medium";
+  --font-ui-semibold: "WeraPlusJakartaSans-SemiBold";
+  --font-ui-bold: "WeraPlusJakartaSans-Bold";
+
+  --radius-small: 0.5rem;
+  --radius-medium: 1rem;
+  --radius-large: 1.5rem;
+  --radius-full: 999px;
+
+  --spacing-screen: 1.25rem;
+  --spacing-screen-compact: 1rem;
+  --spacing-touch: 3rem;
+}
