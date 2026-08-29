@@ -1,6 +1,7 @@
 import { images } from "@/constants/images";
 import { colors } from "@/theme";
 
+import { useRouter } from "expo-router";
 import { ArrowRight } from "lucide-react-native";
 import {
   Image,
@@ -61,6 +62,8 @@ function WelcomeAction({
 }
 
 export function WelcomeScreen() {
+  const router = useRouter();
+
   return (
     <SafeAreaView
       style={styles.safeArea}
@@ -97,10 +100,14 @@ export function WelcomeScreen() {
           </Text>
 
           <View className="mt-5 gap-1">
-            <WelcomeAction label="Start building my profile" />
+            <WelcomeAction
+              label="Get started"
+              onPress={() => router.push("/sign-up")}
+            />
 
             <WelcomeAction
               label="I already have an account"
+              onPress={() => router.push("/sign-in")}
               variant="secondary"
             />
           </View>
