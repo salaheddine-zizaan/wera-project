@@ -3,6 +3,7 @@ import { BlurView } from "expo-blur";
 import { Check, X } from "lucide-react-native";
 import { type RefObject, useEffect, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   Keyboard,
   KeyboardAvoidingView,
   Modal,
@@ -17,7 +18,7 @@ import {
 type VerificationCodeModalProps = {
   blurTarget: RefObject<View | null>;
   email: string;
-  onComplete: () => void;
+  onComplete: (code: string) => Promise<void>;
   onDismiss: () => void;
   visible: boolean;
 };
@@ -33,10 +34,12 @@ export function VerificationCodeModal({
 }: VerificationCodeModalProps) {
   const inputRef = useRef<TextInput>(null);
   const [code, setCode] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (!visible) {
       setCode("");
+      setIsSubmitting(false);
     }
   }, [visible]);
 
@@ -46,9 +49,10 @@ export function VerificationCodeModal({
     const nextCode = value.replace(/\D/g, "").slice(0, CODE_LENGTH);
     setCode(nextCode);
 
-    if (nextCode.length === CODE_LENGTH) {
+    if (nextCode.length === CODE_LENGTH && !isSubmitting) {
       Keyboard.dismiss();
-      onComplete();
+      setIsSubmitting(true);
+      void onComplete(nextCode).finally(() => setIsSubmitting(false));
     }
   };
 
@@ -60,7 +64,7 @@ export function VerificationCodeModal({
   return (
     <Modal
       animationType="fade"
-      onRequestClose={() => undefined}
+      onRequestClose={handleDismiss}
       presentationStyle="overFullScreen"
       statusBarTranslucent
       transparent
@@ -134,9 +138,16 @@ export function VerificationCodeModal({
             value={code}
           />
 
-          <Text className="mt-6 text-center font-ui text-[12px] leading-5 text-text-secondary">
-            Enter the six-digit code to continue.
-          </Text>
+          {isSubmitting ? (
+            <View className="mt-6 flex-row items-center justify-center gap-2">
+              <ActivityIndicator accessibilityLabel="Verifying code" color={colors.navy} size="small" />
+              <Text className="font-ui text-[12px] leading-5 text-text-secondary">Verifying your code…</Text>
+            </View>
+          ) : (
+            <Text className="mt-6 text-center font-ui text-[12px] leading-5 text-text-secondary">
+              Enter the six-digit code to continue.
+            </Text>
+          )}
         </Pressable>
       </KeyboardAvoidingView>
     </Modal>

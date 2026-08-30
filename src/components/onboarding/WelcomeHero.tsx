@@ -78,7 +78,7 @@ export function WelcomeHero() {
   }));
 
   return (
-    <View className="relative mt-2 flex-1 overflow-hidden">
+    <View className="relative mt-0 flex-1 overflow-hidden">
       <Animated.Image
         accessibilityLabel="Women wearing different Wera styles"
         source={images.onboardingWelcomeWomen}

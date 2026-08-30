@@ -1,6 +1,8 @@
 import { VerificationCodeModal } from "@/components/auth/VerificationCodeModal";
 import { images } from "@/constants/images";
 import { colors, fontFamilies } from "@/theme";
+import { useAuth, useSignIn, useSignUp } from "@clerk/expo";
+import { useSSO } from "@clerk/expo/experimental";
 import { BlurTargetView } from "expo-blur";
 import { useRouter } from "expo-router";
 import {
@@ -8,8 +10,10 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react-native";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
+  ActivityIndicator,
+  Alert,
   Image,
   Pressable,
   ScrollView,
@@ -22,6 +26,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 type AuthMode = "sign-in" | "sign-up";
+type VerificationPurpose = "sign-in-mfa" | "sign-up";
 
 type AuthScreenProps = {
   mode: AuthMode;
@@ -43,9 +48,11 @@ const copyByMode = {
 type SocialAuthButtonProps = {
   label: string;
   provider: "apple" | "google" | "facebook";
+  disabled: boolean;
+  onPress: () => void;
 };
 
-function SocialAuthButton({ label, provider }: SocialAuthButtonProps) {
+function SocialAuthButton({ disabled, label, onPress, provider }: SocialAuthButtonProps) {
   const icon = {
     apple: images.authAppleLogo,
     google: images.authGoogleLogo,
@@ -55,7 +62,9 @@ function SocialAuthButton({ label, provider }: SocialAuthButtonProps) {
   return (
     <Pressable
       accessibilityRole="button"
-      className="h-[52px] flex-row items-center rounded-medium border border-border-default bg-surface px-5 active:bg-surface-secondary"
+      className="h-[52px] flex-row items-center rounded-medium border border-border-default bg-surface px-5 active:bg-surface-secondary disabled:opacity-60"
+      disabled={disabled}
+      onPress={onPress}
     >
       <View className="w-11 items-start">
         <Image
@@ -72,18 +81,218 @@ function SocialAuthButton({ label, provider }: SocialAuthButtonProps) {
   );
 }
 
+type ClerkErrorShape = {
+  errors?: Array<{
+    longMessage?: string;
+    message?: string;
+  }>;
+  message?: string;
+};
+
+const socialStrategyByProvider = {
+  apple: "oauth_apple",
+  facebook: "oauth_facebook",
+  google: "oauth_google",
+} as const;
+
+function getClerkErrorMessage(error: unknown, fallback: string) {
+  if (typeof error !== "object" || error === null) {
+    return fallback;
+  }
+
+  const clerkError = error as ClerkErrorShape;
+  return clerkError.errors?.[0]?.longMessage ?? clerkError.errors?.[0]?.message ?? clerkError.message ?? fallback;
+}
+
 export function AuthScreen({ mode }: AuthScreenProps) {
   const router = useRouter();
+  const { isLoaded, isSignedIn } = useAuth();
+  const { signIn } = useSignIn();
+  const { signUp } = useSignUp();
+  const { startSSOFlow } = useSSO();
   const blurTargetRef = useRef<View>(null);
   const [email, setEmail] = useState("");
   const [isPasswordVisible, setPasswordVisible] = useState(false);
   const [password, setPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isVerificationVisible, setVerificationVisible] = useState(false);
+  const [verificationPurpose, setVerificationPurpose] = useState<VerificationPurpose>("sign-up");
   const copy = copyByMode[mode];
+
+  useEffect(() => {
+    if (isLoaded && isSignedIn) {
+      router.replace("/");
+    }
+  }, [isLoaded, isSignedIn, router]);
 
   const navigateToMode = (nextMode: AuthMode) => {
     router.replace(nextMode === "sign-in" ? "/sign-in" : "/sign-up");
   };
+
+  const showError = (error: unknown, fallback: string) => {
+    Alert.alert("Unable to continue", getClerkErrorMessage(error, fallback));
+  };
+
+  const handlePrimaryAction = async () => {
+    const emailAddress = email.trim();
+
+    if (!emailAddress) {
+      Alert.alert("Email required", "Enter your email address to continue.");
+      return;
+    }
+
+    if (!password) {
+      Alert.alert("Password required", "Enter a password to continue.");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      if (mode === "sign-up") {
+        const { error: createError } = await signUp.password({
+          emailAddress,
+          password,
+        });
+
+        if (createError) {
+          showError(createError, "We couldn't create your account.");
+          return;
+        }
+
+        const { error: emailCodeError } = await signUp.verifications.sendEmailCode();
+
+        if (emailCodeError) {
+          showError(emailCodeError, "We couldn't send your verification code.");
+          return;
+        }
+
+        setVerificationPurpose("sign-up");
+        setVerificationVisible(true);
+        return;
+      }
+
+      const { error: passwordError } = await signIn.password({
+        emailAddress,
+        password,
+      });
+
+      if (passwordError) {
+        showError(passwordError, "Your email address or password is incorrect.");
+        return;
+      }
+
+      if (signIn.status === "needs_second_factor" || signIn.status === "needs_client_trust") {
+        const supportsEmailCode = signIn.supportedSecondFactors.some(
+          (factor) => factor.strategy === "email_code",
+        );
+
+        if (!supportsEmailCode) {
+          Alert.alert(
+            "Additional verification required",
+            "This device needs a verification method that isn't available in this app yet.",
+          );
+          return;
+        }
+
+        const { error: emailCodeError } = await signIn.mfa.sendEmailCode();
+
+        if (emailCodeError) {
+          showError(emailCodeError, "We couldn't send your verification code.");
+          return;
+        }
+
+        setVerificationPurpose("sign-in-mfa");
+        setVerificationVisible(true);
+        return;
+      }
+
+      if (signIn.status !== "complete") {
+        Alert.alert(
+          "Sign in needs more information",
+          "This account needs an additional verification step before it can be signed in.",
+        );
+        return;
+      }
+
+      const { error: finalizeError } = await signIn.finalize();
+
+      if (finalizeError) {
+        showError(finalizeError, "We couldn't complete your sign in.");
+        return;
+      }
+
+      router.replace("/");
+    } catch (error) {
+      showError(error, "Something went wrong. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleVerificationComplete = async (code: string) => {
+    if (verificationPurpose === "sign-in-mfa") {
+      const { error: verificationError } = await signIn.mfa.verifyEmailCode({ code });
+
+      if (verificationError) {
+        showError(verificationError, "That verification code isn't valid. Please try again.");
+        return;
+      }
+
+      if (signIn.status !== "complete") {
+        Alert.alert(
+          "Sign in needs more information",
+          "This account needs an additional verification step before it can be signed in.",
+        );
+        return;
+      }
+
+      const { error: finalizeError } = await signIn.finalize();
+
+      if (finalizeError) {
+        showError(finalizeError, "We couldn't complete your sign in.");
+        return;
+      }
+
+      setVerificationVisible(false);
+      router.replace("/");
+      return;
+    }
+
+    const { error: verificationError } = await signUp.verifications.verifyEmailCode({ code });
+
+    if (verificationError) {
+      showError(verificationError, "That verification code isn't valid. Please try again.");
+      return;
+    }
+
+    const { error: finalizeError } = await signUp.finalize();
+
+    if (finalizeError) {
+      showError(finalizeError, "We couldn't complete your account setup.");
+      return;
+    }
+
+    setVerificationVisible(false);
+    router.replace("/");
+  };
+
+  const handleSocialAuth = async (provider: keyof typeof socialStrategyByProvider) => {
+    setIsSubmitting(true);
+
+    try {
+      await startSSOFlow({ strategy: socialStrategyByProvider[provider] });
+      router.replace("/");
+    } catch (error) {
+      showError(error, `We couldn't continue with ${provider}.`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (isLoaded && isSignedIn) {
+    return null;
+  }
 
   return (
     <BlurTargetView ref={blurTargetRef} style={styles.screen}>
@@ -167,46 +376,49 @@ export function AuthScreen({ mode }: AuthScreenProps) {
               />
             </View>
 
-            {mode === "sign-in" && (
-              <View className="mt-3 h-14 flex-row items-center rounded-medium border border-border-default bg-surface px-5">
-                <Image
-                  accessibilityLabel=""
-                  className="h-6 w-6"
-                  resizeMode="contain"
-                  source={images.authPasswordIcon}
-                />
-                <TextInput
-                  accessibilityLabel="Password"
-                  autoComplete="current-password"
-                  onChangeText={setPassword}
-                  placeholder="Password"
-                  placeholderTextColor={colors.textSecondary}
-                  secureTextEntry={!isPasswordVisible}
-                  selectionColor={colors.navy}
-                  value={password}
-                  className="ml-4 flex-1 font-ui text-[15px] text-text-primary"
-                />
-                <Pressable
-                  accessibilityLabel={isPasswordVisible ? "Hide password" : "Show password"}
-                  className="h-11 w-11 items-end justify-center"
-                  onPress={() => setPasswordVisible((visible) => !visible)}
-                >
-                  {isPasswordVisible ? (
-                    <EyeOff color={colors.textPrimary} size={23} strokeWidth={1.7} />
-                  ) : (
-                    <Eye color={colors.textPrimary} size={23} strokeWidth={1.7} />
-                  )}
-                </Pressable>
-              </View>
-            )}
+            <View className="mt-3 h-14 flex-row items-center rounded-medium border border-border-default bg-surface px-5">
+              <Image
+                accessibilityLabel=""
+                className="h-6 w-6"
+                resizeMode="contain"
+                source={images.authPasswordIcon}
+              />
+              <TextInput
+                accessibilityLabel="Password"
+                autoComplete={mode === "sign-in" ? "current-password" : "new-password"}
+                onChangeText={setPassword}
+                placeholder="Password"
+                placeholderTextColor={colors.textSecondary}
+                secureTextEntry={!isPasswordVisible}
+                selectionColor={colors.navy}
+                value={password}
+                className="ml-4 flex-1 font-ui text-[15px] text-text-primary"
+              />
+              <Pressable
+                accessibilityLabel={isPasswordVisible ? "Hide password" : "Show password"}
+                className="h-11 w-11 items-end justify-center"
+                onPress={() => setPasswordVisible((visible) => !visible)}
+              >
+                {isPasswordVisible ? (
+                  <EyeOff color={colors.textPrimary} size={23} strokeWidth={1.7} />
+                ) : (
+                  <Eye color={colors.textPrimary} size={23} strokeWidth={1.7} />
+                )}
+              </Pressable>
+            </View>
 
             <Pressable
               accessibilityRole="button"
-              className="mt-4 h-14 flex-row items-center justify-between rounded-medium bg-navy px-5 active:opacity-80"
-              onPress={() => setVerificationVisible(true)}
+              className="mt-4 h-14 flex-row items-center justify-between rounded-medium bg-navy px-5 active:opacity-80 disabled:opacity-60"
+              disabled={isSubmitting}
+              onPress={() => void handlePrimaryAction()}
             >
               <Text className="font-ui-semibold text-base text-surface">{copy.action}</Text>
-              <ArrowRight color={colors.surface} size={23} strokeWidth={2} />
+              {isSubmitting ? (
+                <ActivityIndicator accessibilityLabel="Processing authentication" color={colors.surface} size="small" />
+              ) : (
+                <ArrowRight color={colors.surface} size={23} strokeWidth={2} />
+              )}
             </Pressable>
 
             <View className="mt-4 flex-row items-center gap-4">
@@ -216,9 +428,24 @@ export function AuthScreen({ mode }: AuthScreenProps) {
             </View>
 
             <View className="mt-4 gap-2">
-              <SocialAuthButton label="Continue with Apple" provider="apple" />
-              <SocialAuthButton label="Continue with Google" provider="google" />
-              <SocialAuthButton label="Continue with Facebook" provider="facebook" />
+              <SocialAuthButton
+                disabled={isSubmitting}
+                label="Continue with Apple"
+                onPress={() => void handleSocialAuth("apple")}
+                provider="apple"
+              />
+              <SocialAuthButton
+                disabled={isSubmitting}
+                label="Continue with Google"
+                onPress={() => void handleSocialAuth("google")}
+                provider="google"
+              />
+              <SocialAuthButton
+                disabled={isSubmitting}
+                label="Continue with Facebook"
+                onPress={() => void handleSocialAuth("facebook")}
+                provider="facebook"
+              />
             </View>
 
             <Text className="mt-4 text-center font-ui text-[12px] leading-5 text-text-secondary">
@@ -232,11 +459,11 @@ export function AuthScreen({ mode }: AuthScreenProps) {
         <VerificationCodeModal
           blurTarget={blurTargetRef}
           email={email}
-          onComplete={() => {
+          onComplete={handleVerificationComplete}
+          onDismiss={() => {
             setVerificationVisible(false);
-            router.replace("/");
+            setVerificationPurpose("sign-up");
           }}
-          onDismiss={() => setVerificationVisible(false)}
           visible={isVerificationVisible}
         />
       </SafeAreaView>

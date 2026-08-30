@@ -74,13 +74,13 @@ export function WelcomeScreen() {
         barStyle="dark-content"
       />
 
-      <View className="flex-1 bg-canvas px-6 pb-4 pt-2">
+      <View className="flex-1 bg-canvas px-6 pb-12 pt-2">
         {/* Logo */}
         <Image
           accessibilityLabel="Wera"
           source={images.weraLogoWithName}
           resizeMode="contain"
-          className="h-7 w-28"
+          className="h-10 w-28"
         />
 
         {/* Animated women / men hero */}
