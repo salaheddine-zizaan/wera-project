@@ -1,6 +1,7 @@
 import { images } from "@/constants/images";
 import { colors } from "@/theme";
 
+import { useRouter } from "expo-router";
 import { ArrowRight } from "lucide-react-native";
 import {
   Image,
@@ -61,6 +62,8 @@ function WelcomeAction({
 }
 
 export function WelcomeScreen() {
+  const router = useRouter();
+
   return (
     <SafeAreaView
       style={styles.safeArea}
@@ -71,13 +74,13 @@ export function WelcomeScreen() {
         barStyle="dark-content"
       />
 
-      <View className="flex-1 bg-canvas px-6 pb-4 pt-2">
+      <View className="flex-1 bg-canvas px-6 pb-12 pt-2">
         {/* Logo */}
         <Image
           accessibilityLabel="Wera"
           source={images.weraLogoWithName}
           resizeMode="contain"
-          className="h-7 w-28"
+          className="h-10 w-28"
         />
 
         {/* Animated women / men hero */}
@@ -97,10 +100,14 @@ export function WelcomeScreen() {
           </Text>
 
           <View className="mt-5 gap-1">
-            <WelcomeAction label="Start building my profile" />
+            <WelcomeAction
+              label="Get started"
+              onPress={() => router.push("/sign-up")}
+            />
 
             <WelcomeAction
               label="I already have an account"
+              onPress={() => router.push("/sign-in")}
               variant="secondary"
             />
           </View>
