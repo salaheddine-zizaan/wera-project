@@ -121,9 +121,9 @@ export function AuthScreen({ mode }: AuthScreenProps) {
 
   useEffect(() => {
     if (isLoaded && isSignedIn) {
-      router.replace("/");
+      router.replace(mode === "sign-up" ? "/profile-welcome" : "/");
     }
-  }, [isLoaded, isSignedIn, router]);
+  }, [isLoaded, isSignedIn, mode, router]);
 
   const navigateToMode = (nextMode: AuthMode) => {
     router.replace(nextMode === "sign-in" ? "/sign-in" : "/sign-up");
@@ -274,7 +274,7 @@ export function AuthScreen({ mode }: AuthScreenProps) {
     }
 
     setVerificationVisible(false);
-    router.replace("/");
+    router.replace("/profile-welcome");
   };
 
   const handleSocialAuth = async (provider: keyof typeof socialStrategyByProvider) => {
@@ -282,7 +282,7 @@ export function AuthScreen({ mode }: AuthScreenProps) {
 
     try {
       await startSSOFlow({ strategy: socialStrategyByProvider[provider] });
-      router.replace("/");
+      router.replace(mode === "sign-up" ? "/profile-welcome" : "/");
     } catch (error) {
       showError(error, `We couldn't continue with ${provider}.`);
     } finally {

@@ -5,6 +5,7 @@ export const images = {
   authMailIcon: require("../../assets/icons/auth/mail-50.png"),
   authPasswordIcon: require("../../assets/icons/auth/password-50.png"),
   onboardingWelcomeWomen: require("../../assets/images/onboarding/welcome-women.png"),
+  onboardingProfileWelcomeMascot: require("../../assets/mascot/mascot-welcome.png"),
   weraLogoWithName: require("../../assets/logos/wera-logo-with-name.png"),
   onboardingWelcomeMen: require("../../assets/images/onboarding/welcome-men.png"),
 } as const;
