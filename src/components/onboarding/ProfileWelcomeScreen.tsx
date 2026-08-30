@@ -2,7 +2,7 @@ import { images } from "@/constants/images";
 import { useOnboardingStore } from "@/store/onboarding-store";
 import { colors } from "@/theme";
 
-import { useRouter } from "expo-router";
+import { Link } from "expo-router";
 import { ArrowRight, Clock3, Shirt, Sparkles, UserRound } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { Image, Pressable, StatusBar, StyleSheet, Text, View } from "react-native";
@@ -43,7 +43,6 @@ function ProfileBenefit({ icon: Icon, label }: ProfileBenefitProps) {
 }
 
 export function ProfileWelcomeScreen() {
-  const router = useRouter();
   const setCurrentStep = useOnboardingStore((state) => state.setCurrentStep);
   const [dialogueStep, setDialogueStep] = useState(0);
   const [isProfileStarting, setProfileStarting] = useState(false);
@@ -85,7 +84,6 @@ export function ProfileWelcomeScreen() {
   const handleStartProfile = () => {
     setCurrentStep("about-you");
     setProfileStarting(true);
-    router.push("/about-you");
   };
 
   return (
@@ -156,19 +154,20 @@ export function ProfileWelcomeScreen() {
           </View>
         </View>
 
-        <Pressable
-          accessibilityRole="button"
-          accessibilityState={{ busy: isProfileStarting }}
-          className="relative mt-12 h-[58px] items-center justify-center rounded-large bg-navy active:opacity-85"
-          onPress={handleStartProfile}
-        >
-          <Text className="font-ui-semibold text-[17px] leading-[22px] text-surface">
-            {isProfileStarting ? "Your profile is starting" : "Let's make my profile"}
-          </Text>
-          <View className="absolute right-5">
-            <ArrowRight color={colors.surface} size={25} strokeWidth={1.8} />
-          </View>
-        </Pressable>
+        <Link asChild href="/about-you" onPress={handleStartProfile}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityState={{ busy: isProfileStarting }}
+            className="relative mt-12 h-[58px] items-center justify-center rounded-large bg-navy active:opacity-85"
+          >
+            <Text className="font-ui-semibold text-[17px] leading-[22px] text-surface">
+              {isProfileStarting ? "Your profile is starting" : "Let's make my profile"}
+            </Text>
+            <View className="absolute right-5">
+              <ArrowRight color={colors.surface} size={25} strokeWidth={1.8} />
+            </View>
+          </Pressable>
+        </Link>
 
         <View className="mt-3 flex-row items-center justify-center gap-2">
           <Clock3 color={colors.textSecondary} size={16} strokeWidth={1.6} />
