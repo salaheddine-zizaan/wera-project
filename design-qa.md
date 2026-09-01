@@ -48,3 +48,42 @@
 - Initial QA: blocked before visual comparison because no in-app browser is available.
 
 final result: blocked
+
+---
+
+## 2026-09-01 Reference-match addendum
+
+**Comparison Target**
+
+- Source visual truth: the profile-welcome reference image attached to the current task conversation.
+- Implementation: `src/components/onboarding/ProfileWelcomeScreen.tsx` in its initial, signed-in state.
+- Target viewport: a portrait iPhone composition with native device chrome excluded from the app-owned comparison.
+
+**Evidence**
+
+- Source visual dimensions: 853 × 1844 px.
+- Reused source assets: `assets/logos/wera-logo-with-name.png` and `assets/mascot/mascot-welcome.png`.
+- Implementation screenshot: unavailable. No callable in-app browser or device/simulator capture surface is available in this session.
+- Full-view and focused-region comparison: blocked because a matching app-owned screen capture could not be obtained.
+
+**Required Fidelity Surfaces**
+
+- Fonts and typography: Wera's existing League Spartan, Cormorant Garamond Italic, and Plus Jakarta Sans assets reproduce the target's display, editorial, and UI roles.
+- Spacing and layout rhythm: the screen uses the reference's header, descriptor, mid-screen copy/art composition, bottom-anchored CTA, and two-part reassurance row.
+- Colors and visual tokens: Canvas, Navy, Warm Accent, and secondary-surface halo map directly to the visible reference palette.
+- Image quality and asset fidelity: the supplied Wera wordmark and mascot assets are used unmodified.
+- Copy and content: the visible strings now match the reference, including `Your personal stylist`, `A profile that feels like you.`, `Progress saved`, and `Takes a few minutes`.
+
+**Findings**
+
+- [P1] Browser-rendered visual comparison unavailable.
+  Location: local Expo runtime.
+  Evidence: no in-app browser, device, or simulator capture surface is callable in this session.
+  Impact: final pixel-level checks for headline wrapping, mascot placement, and bottom safe-area spacing remain unverified.
+  Fix: capture the signed-in profile-welcome route at the reference phone viewport and compare it side by side with the attached source before accepting a pixel-perfect result.
+
+**Comparison History**
+
+- 2026-09-01: rebuilt the screen composition against the current reference; browser-rendered visual QA remains blocked.
+
+final result: blocked

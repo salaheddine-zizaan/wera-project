@@ -1,38 +1,36 @@
 import { images } from "@/constants/images";
 import { useOnboardingStore } from "@/store/onboarding-store";
 import { colors } from "@/theme";
-
 import { useRouter } from "expo-router";
-import { ArrowRight, Check, Clock3, Shirt, Sparkles, UserRound } from "lucide-react-native";
+import { ArrowRight, Check, Clock3 } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
-import { Image, Pressable, StatusBar, StyleSheet, Text, View } from "react-native";
+import {
+  Image,
+  Pressable,
+  StatusBar,
+  Text,
+  useWindowDimensions,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Animated, { FadeIn, useReducedMotion } from "react-native-reanimated";
 
 const NAVIGATION_RECOVERY_DELAY_MS = 1500;
 
-type ProfileBenefitProps = {
-  icon: typeof UserRound;
-  label: string;
-};
-
-function ProfileBenefit({ icon: Icon, label }: ProfileBenefitProps) {
-  return (
-    <View className="flex-1 gap-2">
-      <View className="h-10 w-10 items-center justify-center rounded-full bg-surface-secondary">
-        <Icon color={colors.navy} size={20} strokeWidth={1.6} />
-      </View>
-      <Text className="font-ui-medium text-[12px] leading-[17px] text-navy">{label}</Text>
-    </View>
-  );
-}
-
 export function ProfileWelcomeScreen() {
   const router = useRouter();
-  const setCurrentStep = useOnboardingStore((state) => state.setCurrentStep);
+
+  const setCurrentStep = useOnboardingStore(
+    (state) => state.setCurrentStep,
+  );
+
   const [isStartingProfile, setStartingProfile] = useState(false);
-  const navigationRecoveryTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  const reduceMotion = useReducedMotion();
+
+  const navigationRecoveryTimer =
+    useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  const { height: screenHeight } = useWindowDimensions();
+
+  const isCompactScreen = screenHeight < 740;
 
   useEffect(
     () => () => {
@@ -49,6 +47,7 @@ export function ProfileWelcomeScreen() {
     }
 
     setStartingProfile(true);
+
     navigationRecoveryTimer.current = setTimeout(
       () => setStartingProfile(false),
       NAVIGATION_RECOVERY_DELAY_MS,
@@ -62,81 +61,198 @@ export function ProfileWelcomeScreen() {
     }
   };
 
+  /*
+   * ─────────────────────────────────────────────
+   * Responsive visual treatment
+   * ─────────────────────────────────────────────
+   */
+
+  const screenClassName = isCompactScreen
+    ? "flex-1 px-5 pb-2"
+    : "flex-1 px-5 pb-4";
+
+  const heroClassName = isCompactScreen
+    ? "relative flex-1 pt-10"
+    : "relative flex-1 pt-[76px]";
+
+  const mascotHaloClassName = isCompactScreen
+    ? "absolute right-[-72px] top-[130px] h-[220px] w-[220px] rounded-full bg-surface-secondary opacity-70"
+    : "absolute right-[-76px] top-[170px] h-[270px] w-[270px] rounded-full bg-surface-secondary opacity-70";
+
+  const mascotClassName = isCompactScreen
+    ? "absolute right-[-18px] top-[135px] h-[202px] w-[176px]"
+    : "absolute right-[-26px] top-[170px] h-[246px] w-[220px]";
+
+  const displayHeadlineClassName = isCompactScreen
+    ? "font-display text-[45px] leading-[43px] tracking-[-2.2px] text-navy"
+    : "font-display text-[52px] leading-[50px] tracking-[-2.6px] text-navy";
+
+  const editorialHeadlineClassName = isCompactScreen
+    ? "-mt-1 font-editorial text-[42px] leading-[46px] tracking-[-1px] text-navy"
+    : "-mt-1 font-editorial text-[49px] leading-[52px] tracking-[-1px] text-navy";
+
   return (
-    <SafeAreaView style={styles.safeArea} edges={["top", "bottom"]}>
-      <StatusBar backgroundColor={colors.canvas} barStyle="dark-content" />
+    <SafeAreaView
+      style={{
+        flex: 1,
+        backgroundColor: colors.canvas,
+      }}
+      edges={["top", "bottom"]}
+    >
+      <StatusBar
+        backgroundColor={colors.canvas}
+        barStyle="dark-content"
+      />
 
-      <View className="flex-1 px-5 pb-4 pt-8">
-        <Animated.View entering={reduceMotion ? undefined : FadeIn.duration(320)} className="flex-1">
-          <View className="relative h-[330px] justify-end">
-            <View className="absolute right-[-16px] top-0 h-[315px] w-[260px]">
-              <View className="absolute right-1 top-10 h-[240px] w-[240px] rounded-full bg-surface-secondary" />
-              <Image
-                accessibilityLabel="Wera, your personal styling companion"
-                className="h-full w-full"
-                resizeMode="contain"
-                source={images.onboardingProfileWelcomeMascot}
-              />
-            </View>
+      <View className={screenClassName}>
+        {/* ───────────────── HEADER ───────────────── */}
 
-            <View className="max-w-[58%] pb-3">
-              <Text className="font-ui-semibold text-[16px] leading-6 text-warm-accent">Hi, I&apos;m Wera</Text>
-              <Text className="mt-3 font-editorial text-[48px] leading-[43px] text-navy">
-                Let&apos;s make{`\n`}this yours.
+        <View className={isCompactScreen ? "pt-1" : "pt-2"}>
+          <View className="h-11 justify-center">
+            <Image
+              accessibilityLabel="Wera"
+              className="-ml-3.5 h-[30px] w-[104px]"
+              source={images.weraLogoWithName}
+              resizeMode="contain"
+            />
+          </View>
+
+          <Text className="mt-2 font-ui-medium text-[11px] uppercase leading-4 tracking-[2.5px] text-text-secondary">
+            Your personal stylist
+          </Text>
+        </View>
+
+        {/* ───────────────── HERO ───────────────── */}
+
+        <View className={heroClassName}>
+          {/* Soft editorial shape behind mascot */}
+          <View
+            pointerEvents="none"
+            className={mascotHaloClassName}
+          />
+
+          {/* Mascot */}
+          <Image
+            accessibilityLabel="Wera, your personal styling companion"
+            className={mascotClassName}
+            source={images.onboardingProfileWelcomeMascot}
+            resizeMode="contain"
+          />
+
+          {/* Copy */}
+          <View className="relative z-10">
+            <Text className="font-ui-medium text-[18px] leading-6 tracking-[0.3px] text-warm-accent">
+              Hi, I&apos;m Wera
+            </Text>
+
+            <View
+              className={
+                isCompactScreen
+                  ? "mt-8"
+                  : "mt-10"
+              }
+            >
+              <Text className="font-ui-semibold text-[12px] uppercase leading-[18px] tracking-[2.4px] text-navy">
+                Let&apos;s make
               </Text>
-              <Text className="mt-4 font-ui text-[14px] leading-[21px] text-text-secondary">
-                A few thoughtful details are all I need to start styling around you.
+
+              <View className="mt-3">
+                <Text className={displayHeadlineClassName}>
+                  A PROFILE
+                  {"\n"}
+                  THAT
+                </Text>
+
+                <Text className={editorialHeadlineClassName}>
+                  feels like you.
+                </Text>
+              </View>
+
+              {/* Small Wera accent */}
+              <View className="mt-4 h-[2px] w-7 bg-warm-accent" />
+
+              <Text
+                className={
+                  isCompactScreen
+                    ? "mt-4 max-w-[205px] font-ui text-[14px] leading-[21px] text-text-secondary"
+                    : "mt-5 max-w-[225px] font-ui text-[15px] leading-[23px] text-text-secondary"
+                }
+              >
+                Share the essentials, and I&apos;ll make every suggestion more
+                personal.
               </Text>
             </View>
           </View>
+        </View>
 
-          <View className="mt-7 border-t border-border-subtle pt-5">
-            <Text className="font-ui-semibold text-[15px] text-navy">Your profile helps Wera</Text>
-            <View className="mt-4 flex-row gap-3">
-              <ProfileBenefit icon={UserRound} label="Understand your style" />
-              <ProfileBenefit icon={Shirt} label="Recommend better looks" />
-              <ProfileBenefit icon={Sparkles} label="Make it personal" />
-            </View>
-          </View>
-        </Animated.View>
+        {/* ───────────────── ACTION ───────────────── */}
 
-        <View className="gap-3">
+        <View className={isCompactScreen ? "pb-10" : "pb-12 pt-2"}>
           <Pressable
             accessibilityRole="button"
-            accessibilityState={{ busy: isStartingProfile, disabled: isStartingProfile }}
+            accessibilityState={{
+              busy: isStartingProfile,
+              disabled: isStartingProfile,
+            }}
             className={
               isStartingProfile
-                ? "h-[58px] flex-row items-center justify-center rounded-large bg-navy opacity-70"
-                : "h-[58px] flex-row items-center justify-center rounded-large bg-navy active:opacity-85"
+                ? "h-[58px] items-center justify-center rounded-medium bg-navy opacity-70"
+                : "h-[58px] items-center justify-center rounded-medium bg-navy active:scale-[0.985] active:opacity-90"
             }
             disabled={isStartingProfile}
             onPress={handleStartProfile}
           >
-            <Text className="font-ui-semibold text-[17px] text-surface">
-              {isStartingProfile ? "Opening your profile" : "Create my profile"}
+            <Text className="font-ui-semibold text-[16px] leading-6 text-surface">
+              {isStartingProfile
+                ? "Opening your profile"
+                : "Create my profile"}
             </Text>
-            <ArrowRight className="absolute right-5" color={colors.surface} size={24} strokeWidth={1.8} />
+
+            <View className="absolute bottom-0 right-[18px] top-0 justify-center">
+              <ArrowRight
+                color={colors.surface}
+                size={27}
+                strokeWidth={1.6}
+              />
+            </View>
           </Pressable>
 
-          <View className="flex-row items-center justify-center gap-2">
-            <Check color={colors.warmAccent} size={16} strokeWidth={2} />
-            <Text className="font-ui text-[12px] leading-4 text-text-secondary">
-              Save your progress and make changes anytime.
-            </Text>
-          </View>
-          <View className="flex-row items-center justify-center gap-2">
-            <Clock3 color={colors.textSecondary} size={15} strokeWidth={1.6} />
-            <Text className="font-ui text-[12px] leading-4 text-text-secondary">It only takes a few minutes.</Text>
+          {/* Reassurance row */}
+          <View
+            className={
+              isCompactScreen
+                ? "mt-[18px] flex-row items-center justify-center"
+                : "mt-6 flex-row items-center justify-center"
+            }
+          >
+            <View className="flex-row items-center gap-2">
+              <Check
+                color={colors.warmAccent}
+                size={19}
+                strokeWidth={2}
+              />
+
+              <Text className="font-ui text-[12px] leading-[17px] text-text-secondary">
+                Progress saved
+              </Text>
+            </View>
+
+            <View className="mx-4 h-5 w-px bg-border-default" />
+
+            <View className="flex-row items-center gap-2">
+              <Clock3
+                color={colors.textSecondary}
+                size={18}
+                strokeWidth={1.7}
+              />
+
+              <Text className="font-ui text-[12px] leading-[17px] text-text-secondary">
+                Takes a few minutes
+              </Text>
+            </View>
           </View>
         </View>
       </View>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.canvas,
-  },
-});
