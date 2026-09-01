@@ -219,9 +219,10 @@ Use a feature-oriented structure and keep routing, UI, business logic, data, and
 app/
   (onboarding)/
   (tabs)/
-  studio/
-  closet/
-  profile/
+  (studio)/
+  (closet)/
+  (profile)/
+  (auth)/
 
 components/
   ui/
