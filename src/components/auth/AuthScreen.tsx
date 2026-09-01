@@ -1,8 +1,7 @@
 import { VerificationCodeModal } from "@/components/auth/VerificationCodeModal";
 import { images } from "@/constants/images";
 import { colors, fontFamilies } from "@/theme";
-import { useAuth, useSignIn, useSignUp } from "@clerk/expo";
-import { useSSO } from "@clerk/expo/experimental";
+import { useAuth, useSignIn, useSignUp, useSSO } from "@clerk/expo";
 import { BlurTargetView } from "expo-blur";
 import { useRouter } from "expo-router";
 import {
@@ -281,7 +280,15 @@ export function AuthScreen({ mode }: AuthScreenProps) {
     setIsSubmitting(true);
 
     try {
-      await startSSOFlow({ strategy: socialStrategyByProvider[provider] });
+      const { createdSessionId, setActive } = await startSSOFlow({
+        strategy: socialStrategyByProvider[provider],
+      });
+
+      if (!createdSessionId || !setActive) {
+        return;
+      }
+
+      await setActive({ session: createdSessionId });
       router.replace(mode === "sign-up" ? "/profile-welcome" : "/");
     } catch (error) {
       showError(error, `We couldn't continue with ${provider}.`);
