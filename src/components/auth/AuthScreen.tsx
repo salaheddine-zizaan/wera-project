@@ -1,10 +1,12 @@
 import { VerificationCodeModal } from "@/components/auth/VerificationCodeModal";
 import { images } from "@/constants/images";
+import { useAuthSessionStore } from "@/store/auth-session-store";
 import { colors, fontFamilies } from "@/theme";
 import { useAuth, useSignIn, useSignUp, useSSO } from "@clerk/expo";
 import { BlurTargetView } from "expo-blur";
 import { useRouter } from "expo-router";
 import {
+  AtSign,
   ArrowRight,
   Eye,
   EyeOff,
@@ -46,7 +48,7 @@ const copyByMode = {
 
 type SocialAuthButtonProps = {
   label: string;
-  provider: "apple" | "google" | "facebook";
+  provider: "apple" | "google";
   disabled: boolean;
   onPress: () => void;
 };
@@ -55,7 +57,6 @@ function SocialAuthButton({ disabled, label, onPress, provider }: SocialAuthButt
   const icon = {
     apple: images.authAppleLogo,
     google: images.authGoogleLogo,
-    facebook: images.authFacebookLogo,
   }[provider];
 
   return (
@@ -90,7 +91,6 @@ type ClerkErrorShape = {
 
 const socialStrategyByProvider = {
   apple: "oauth_apple",
-  facebook: "oauth_facebook",
   google: "oauth_google",
 } as const;
 
@@ -109,10 +109,12 @@ export function AuthScreen({ mode }: AuthScreenProps) {
   const { signIn } = useSignIn();
   const { signUp } = useSignUp();
   const { startSSOFlow } = useSSO();
+  const setAuthSession = useAuthSessionStore((state) => state.setSession);
   const blurTargetRef = useRef<View>(null);
   const [email, setEmail] = useState("");
   const [isPasswordVisible, setPasswordVisible] = useState(false);
   const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isVerificationVisible, setVerificationVisible] = useState(false);
   const [verificationPurpose, setVerificationPurpose] = useState<VerificationPurpose>("sign-up");
@@ -134,6 +136,7 @@ export function AuthScreen({ mode }: AuthScreenProps) {
 
   const handlePrimaryAction = async () => {
     const emailAddress = email.trim();
+    const trimmedUsername = username.trim();
 
     if (!emailAddress) {
       Alert.alert("Email required", "Enter your email address to continue.");
@@ -142,6 +145,11 @@ export function AuthScreen({ mode }: AuthScreenProps) {
 
     if (!password) {
       Alert.alert("Password required", "Enter a password to continue.");
+      return;
+    }
+
+    if (mode === "sign-up" && !trimmedUsername) {
+      Alert.alert("Username required", "Choose a username to continue.");
       return;
     }
 
@@ -156,6 +164,15 @@ export function AuthScreen({ mode }: AuthScreenProps) {
 
         if (createError) {
           showError(createError, "We couldn't create your account.");
+          return;
+        }
+
+        const { error: usernameError } = await signUp.update({
+          username: trimmedUsername,
+        });
+
+        if (usernameError) {
+          showError(usernameError, "We couldn't save your username.");
           return;
         }
 
@@ -272,6 +289,7 @@ export function AuthScreen({ mode }: AuthScreenProps) {
       return;
     }
 
+    setAuthSession({ username: username.trim() });
     setVerificationVisible(false);
     router.replace("/profile-welcome");
   };
@@ -361,6 +379,29 @@ export function AuthScreen({ mode }: AuthScreenProps) {
               {copy.description}
             </Text>
 
+            {mode === "sign-up" && (
+              <View className="mt-3 h-14 flex-row items-center rounded-medium border border-border-default bg-surface px-5">
+                <Image
+                  accessibilityLabel=""
+                  className="h-6 w-6"
+                  resizeMode="contain"
+                  source={images.authUsernameIcon}
+                />
+                <TextInput
+                  accessibilityLabel="Username"
+                  autoCapitalize="none"
+                  autoComplete="username-new"
+                  onChangeText={setUsername}
+                  placeholder="Username"
+                  placeholderTextColor={colors.textSecondary}
+                  returnKeyType="next"
+                  selectionColor={colors.navy}
+                  value={username}
+                  className="ml-4 flex-1 font-ui text-[15px] text-text-primary"
+                />
+              </View>
+            )}
+
             <View className="mt-4 h-14 flex-row items-center rounded-medium border border-border-default bg-surface px-5">
               <Image
                 accessibilityLabel=""
@@ -446,12 +487,6 @@ export function AuthScreen({ mode }: AuthScreenProps) {
                 label="Continue with Google"
                 onPress={() => void handleSocialAuth("google")}
                 provider="google"
-              />
-              <SocialAuthButton
-                disabled={isSubmitting}
-                label="Continue with Facebook"
-                onPress={() => void handleSocialAuth("facebook")}
-                provider="facebook"
               />
             </View>
 
