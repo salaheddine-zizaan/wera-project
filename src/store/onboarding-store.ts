@@ -18,6 +18,55 @@ import type {
 
 export const ONBOARDING_STORAGE_KEY = "wera:onboarding";
 
+const ONBOARDING_STEPS = [
+  "about-you",
+  "daily-life",
+  "model-method",
+  "photo-model",
+  "measurements",
+  "usual-sizes",
+  "build",
+  "body-shape",
+  "face-shape",
+  "hair",
+  "facial-hair",
+  "skin-tone",
+  "model-reveal",
+  "taste-discovery",
+  "favorite-colors",
+  "profile-ready",
+] as const satisfies readonly OnboardingStepId[];
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isOnboardingStepId(value: unknown): value is OnboardingStepId {
+  return typeof value === "string" && ONBOARDING_STEPS.some((step) => step === value);
+}
+
+function isWeraProfile(value: unknown): value is WeraProfile {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  const { basics, lifestyle, sizesAndFit, model, taste, colors } = value;
+
+  return (
+    isRecord(basics) &&
+    Array.isArray(basics.clothingDirections) &&
+    isRecord(lifestyle) &&
+    Array.isArray(lifestyle.commonOccasions) &&
+    isRecord(sizesAndFit) &&
+    isRecord(sizesAndFit.measurements) &&
+    isRecord(model) &&
+    isRecord(taste) &&
+    Array.isArray(taste.reactions) &&
+    isRecord(colors) &&
+    Array.isArray(colors.favoriteWearColors)
+  );
+}
+
 type OnboardingStore = {
   profile: WeraProfile;
   currentStep?: OnboardingStepId;
@@ -123,6 +172,23 @@ export const useOnboardingStore = create<OnboardingStore>()(
         currentStep,
         completedSteps,
       }),
+      merge: (persistedState, currentState) => {
+        const savedState = isRecord(persistedState) ? persistedState : undefined;
+        const savedCompletedSteps = Array.isArray(savedState?.completedSteps)
+          ? savedState.completedSteps.filter(isOnboardingStepId)
+          : currentState.completedSteps;
+
+        return {
+          ...currentState,
+          profile: isWeraProfile(savedState?.profile)
+            ? savedState.profile
+            : createInitialWeraProfile(),
+          currentStep: isOnboardingStepId(savedState?.currentStep)
+            ? savedState.currentStep
+            : undefined,
+          completedSteps: savedCompletedSteps,
+        };
+      },
     },
   ),
 );

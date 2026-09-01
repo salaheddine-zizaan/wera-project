@@ -23,7 +23,7 @@ export function HomeScreen() {
   return (
     <SafeAreaView className="flex-1 bg-canvas" edges={["top", "bottom"]}>
       <StatusBar backgroundColor={colors.canvas} barStyle="dark-content" />
-      <View className="flex-1 items-center justify-center px-5">
+      <View className=" items-center justify-center px-5">
         <Text className="font-display text-[38px] tracking-[4px] text-navy">WERA</Text>
         <Pressable
           accessibilityRole="button"
