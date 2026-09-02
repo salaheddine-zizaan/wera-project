@@ -51,6 +51,60 @@ final result: blocked
 
 ---
 
+## 2026-09-02 About You reference-match addendum
+
+**Comparison Target**
+
+- Source visual truth: the About You onboarding reference image attached to the current task conversation.
+- Implementation: `src/components/onboarding/AboutYouScreen.tsx`, initial About You state.
+- Shared component under review: `src/components/onboarding/OnboardingProgress.tsx`, reused by About You and Daily Life.
+- Intended viewport/state: portrait mobile screen, app-owned content only, initial unselected form state.
+
+**Evidence**
+
+- Source visual dimensions: 864 x 1818 px.
+- Implementation screenshot: unavailable. The local Expo web server was already using port 8081, but the required browser connection reported `No browser is available`.
+- CSS viewport and density normalization: unavailable because no browser-rendered implementation screenshot could be captured.
+- Full-view and focused-region comparison: blocked. No valid combined source/implementation visual comparison can be made without a rendered screen capture.
+- Primary interactions checked statically: first-name input, age range selection, shopping direction selection, validation state, Continue navigation to Daily Life, and Back navigation remain wired to the existing onboarding store and router.
+- Console-error check: blocked because no browser runtime is available.
+
+**Required Fidelity Surfaces**
+
+- Fonts and typography: the existing Cormorant Garamond editorial face is used for `with you.` and age labels; Plus Jakarta Sans is retained for functional copy. Runtime rendering and wrapping are unverified.
+- Spacing and layout rhythm: the implementation follows the source sequence of four-stage progress, editorial heading, name field, two-row age grid, two selection cards, and bottom actions. Exact placement is unverified.
+- Colors and tokens: Canvas, Navy, Surface, and restrained neutral borders use the approved Wera token set. Runtime contrast is unverified.
+- Image quality and asset fidelity: the visual contains no app-owned raster imagery. The supplied source's standard UI icons are implemented with the installed Lucide React Native icon library.
+- Copy and content: headings, field labels, option labels, and action labels match the supplied reference; functional selected/disabled states are intentionally added where the source only illustrates the initial state.
+
+**Findings**
+
+- [P1] Browser-rendered visual comparison unavailable.
+  Location: About You onboarding screen.
+  Evidence: browser connection returned `No browser is available`; no implementation screenshot exists.
+  Impact: pixel-level verification of title scale, progress rail alignment, safe-area spacing, and mobile scroll layout remains incomplete.
+  Fix: open the About You route in an Expo-compatible browser, simulator, or device, capture it at the reference viewport, then compare the capture beside the supplied reference and resolve any P1/P2 drift.
+
+**Open Questions**
+
+- None. The implementation preserves the current validation and route behavior while matching the reference's initial visual state.
+
+**Implementation Checklist**
+
+1. Capture the initial About You screen at a matching portrait phone viewport.
+2. Compare the full screen plus focused progress/header and form/action regions against the source image.
+3. Verify the selection states and Continue route transition in the rendered app.
+4. Resolve visual P1/P2 findings, repeat the comparison, and replace this blocked result with a passing QA result.
+
+**Comparison History**
+
+- Initial QA: blocked before visual comparison because no in-app browser is available.
+- Follow-up implementation: made the rail continuous through the dots, removed the phase counter, switched age labels to the UI typeface, and compacted the initial screen into a fixed non-scrolling composition. Visual recapture remains blocked by the same unavailable browser surface.
+
+final result: blocked
+
+---
+
 ## 2026-09-01 Reference-match addendum
 
 **Comparison Target**

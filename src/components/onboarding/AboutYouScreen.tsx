@@ -1,16 +1,16 @@
 import { ageRanges, clothingDirections } from "@/data/onboarding";
 import { useOnboardingStore } from "@/store/onboarding-store";
-import { colors, fontFamilies } from "@/theme";
+import { colors } from "@/theme";
 import type { ClothingDirectionId } from "@/types/onboarding";
 
+import { useUser } from "@clerk/expo";
 import { useRouter } from "expo-router";
-import { ArrowLeft, ArrowRight, Check, Mars, Venus } from "lucide-react-native";
+import { ArrowLeft, ArrowRight, Check, Mars, UserRound, Venus } from "lucide-react-native";
 import { useEffect } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
-  ScrollView,
   StatusBar,
   StyleSheet,
   Text,
@@ -44,40 +44,33 @@ function DirectionOption({ directionId, label, onPress, selected }: DirectionOpt
       accessibilityState={{ selected }}
       className={
         selected
-          ? "relative h-[132px] flex-1 items-center justify-center rounded-medium bg-navy"
-          : "relative h-[132px] flex-1 items-center justify-center rounded-medium border border-border-default bg-surface"
+          ? "relative h-[100px] flex-1 items-center justify-center rounded-medium border border-navy bg-[#F7F8FA]"
+          : "relative h-[100px] flex-1 items-center justify-center rounded-medium border border-border-default bg-surface"
       }
       onPress={onPress}
     >
       <View
         className={
           selected
-            ? "h-12 w-12 items-center justify-center rounded-full bg-[#263958]"
+            ? "h-12 w-12 items-center justify-center rounded-full bg-[#E7EBF2]"
             : "h-12 w-12 items-center justify-center rounded-full bg-surface-secondary"
         }
       >
-        <Icon color={selected ? colors.surface : colors.navy} size={27} strokeWidth={1.55} />
+        <Icon color={colors.navy} size={31} strokeWidth={1.55} />
       </View>
-      <Text
-        className={
-          selected
-            ? "mt-3 font-ui-semibold text-[15px] text-surface"
-            : "mt-3 font-ui-medium text-[15px] text-navy"
-        }
-      >
-        {label}
-      </Text>
-      {selected && (
-        <View className="absolute right-3 top-3 h-6 w-6 items-center justify-center rounded-full bg-surface">
-          <Check color={colors.navy} size={15} strokeWidth={2.4} />
+      <Text className="mt-[7px] font-ui-medium text-[15px] leading-[21px] text-navy">{label}</Text>
+      {selected ? (
+        <View className="absolute right-[9px] top-[9px] h-5 w-5 items-center justify-center rounded-full bg-navy">
+          <Check color={colors.surface} size={13} strokeWidth={2.4} />
         </View>
-      )}
+      ) : null}
     </Pressable>
   );
 }
 
 export function AboutYouScreen() {
   const router = useRouter();
+  const { user } = useUser();
   const basics = useOnboardingStore((state) => state.profile.basics);
   const updateBasics = useOnboardingStore((state) => state.updateBasics);
   const setCurrentStep = useOnboardingStore((state) => state.setCurrentStep);
@@ -87,11 +80,19 @@ export function AboutYouScreen() {
   const selectedDirection = basics.clothingDirections.find(
     (direction) => direction === "menswear" || direction === "womenswear",
   );
-  const canContinue = Boolean(basics.displayName?.trim() && basics.ageRange && selectedDirection);
+  const clerkUsername = user?.username?.trim();
+  const displayName = clerkUsername ?? basics.displayName ?? "";
+  const canContinue = Boolean(displayName.trim() && basics.ageRange && selectedDirection);
 
   useEffect(() => {
     setCurrentStep("about-you");
   }, [setCurrentStep]);
+
+  useEffect(() => {
+    if (clerkUsername && basics.displayName !== clerkUsername) {
+      updateBasics({ displayName: clerkUsername });
+    }
+  }, [basics.displayName, clerkUsername, updateBasics]);
 
   const handleContinue = () => {
     if (!canContinue) {
@@ -111,46 +112,51 @@ export function AboutYouScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={["top", "bottom"]}>
       <StatusBar backgroundColor={colors.canvas} barStyle="dark-content" />
-      <KeyboardAvoidingView behavior={Platform.select({ ios: "padding", android: undefined })} className="flex-1">
-        <ScrollView
-          className="flex-1"
-          contentContainerClassName="px-5 pb-8 pt-4"
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
+      <KeyboardAvoidingView
+        behavior={Platform.select({ ios: "padding", android: undefined })}
+        className="flex-1"
+      >
+        <View className="flex-1 px-5 pb-6 pt-4">
           <OnboardingProgress />
 
           <Animated.View entering={reduceMotion ? undefined : FadeIn.duration(260)}>
-            <View className="mt-10">
-              <Text className="font-ui-semibold text-[16px] leading-6 text-warm-accent">About you</Text>
-              <Text className="mt-2 text-[46px] leading-[43px] text-navy" style={styles.title}>
-                Let&apos;s begin{`\n`}with you.
+            <View className="mt-[30px]">
+              <Text className="font-ui-semibold text-[12px] leading-[14px] tracking-[3.1px] text-navy">
+                LET&apos;S BEGIN
               </Text>
-              <Text className="mt-4 max-w-[310px] font-ui text-[14px] leading-5 text-text-secondary">
-                Tell Wera the essentials. You can update every detail later.
+              <Text className="mt-[7px] pb-0.5 font-editorial-regular text-[50px] leading-[52px] tracking-[-1.1px] text-navy">
+                with you.
               </Text>
             </View>
 
-            <View className="mt-8 gap-7">
+            <View className="mt-7 gap-6">
               <View>
-                <Text className="font-ui-semibold text-[17px] text-navy">What should Wera call you?</Text>
-                <TextInput
-                  accessibilityLabel="Your name"
-                  autoCapitalize="words"
-                  autoComplete="name"
-                  className="mt-3 h-14 rounded-medium border border-border-default bg-surface px-4 font-ui text-[16px] text-navy"
-                  onChangeText={(displayName) => updateBasics({ displayName })}
-                  placeholder="Your first name"
-                  placeholderTextColor={colors.textSecondary}
-                  returnKeyType="done"
-                  selectionColor={colors.navy}
-                  value={basics.displayName ?? ""}
-                />
+                <Text className="font-ui-medium text-[16px] leading-5 text-navy">
+                  What should Wera call you?
+                </Text>
+                <View className="mt-2.5 h-14 flex-row items-center gap-[14px] rounded-medium border border-border-default bg-surface px-4">
+                  <UserRound color={colors.textPrimary} size={27} strokeWidth={1.55} />
+                  <TextInput
+                    accessibilityLabel="Your first name"
+                    autoCapitalize="words"
+                    autoComplete="name"
+                    className="h-full flex-1 font-ui text-[16px] text-navy"
+                    editable={!clerkUsername}
+                    onChangeText={(nextDisplayName) => updateBasics({ displayName: nextDisplayName })}
+                    placeholder="First name"
+                    placeholderTextColor={colors.textSecondary}
+                    returnKeyType="done"
+                    selectionColor={colors.navy}
+                    value={displayName}
+                  />
+                </View>
               </View>
 
               <View>
-                <Text className="font-ui-semibold text-[17px] text-navy">Your age range</Text>
-                <View className="mt-3 flex-row flex-wrap gap-2">
+                <Text className="font-ui-medium text-[16px] leading-5 text-navy">
+                  Which age range fits you best?
+                </Text>
+                <View className="mt-2.5 flex-row flex-wrap justify-between gap-y-2">
                   {ageRanges.map((ageRange) => {
                     const selected = basics.ageRange === ageRange.id;
 
@@ -160,8 +166,8 @@ export function AboutYouScreen() {
                         accessibilityState={{ selected }}
                         className={
                           selected
-                            ? "h-[52px] basis-[30%] flex-grow items-center justify-center rounded-medium bg-navy"
-                            : "h-[52px] basis-[30%] flex-grow items-center justify-center rounded-medium border border-border-default bg-surface"
+                            ? "h-12 w-[31.1%] items-center justify-center rounded-small border border-navy bg-navy"
+                            : "h-12 w-[31.1%] items-center justify-center rounded-small border border-border-default bg-surface"
                         }
                         key={ageRange.id}
                         onPress={() => updateBasics({ ageRange: ageRange.id })}
@@ -169,8 +175,8 @@ export function AboutYouScreen() {
                         <Text
                           className={
                             selected
-                              ? "font-ui-semibold text-[14px] text-surface"
-                              : "font-ui-medium text-[14px] text-navy"
+                              ? "font-ui-medium text-[15px] leading-5 text-surface"
+                              : "font-ui-medium text-[15px] leading-5 text-navy"
                           }
                         >
                           {ageRange.label}
@@ -182,11 +188,10 @@ export function AboutYouScreen() {
               </View>
 
               <View>
-                <Text className="font-ui-semibold text-[17px] text-navy">Your style direction</Text>
-                <Text className="mt-1 font-ui text-[13px] leading-5 text-text-secondary">
-                  This helps us make the experience feel right from day one.
+                <Text className="font-ui-medium text-[16px] leading-5 text-navy">
+                  I&apos;m here to discover
                 </Text>
-                <View className="mt-3 flex-row gap-3">
+                <View className="mt-2.5 flex-row gap-3">
                   {selectableClothingDirections.map((direction) => (
                     <DirectionOption
                       directionId={direction.id}
@@ -201,30 +206,34 @@ export function AboutYouScreen() {
             </View>
           </Animated.View>
 
-          <Pressable
-            accessibilityRole="button"
-            accessibilityState={{ disabled: !canContinue }}
-            className={
-              canContinue
-                ? "relative mt-10 h-[58px] items-center justify-center rounded-large bg-navy active:opacity-85"
-                : "relative mt-10 h-[58px] items-center justify-center rounded-large bg-navy opacity-40"
-            }
-            disabled={!canContinue}
-            onPress={handleContinue}
-          >
-            <Text className="font-ui-semibold text-[17px] text-surface">Continue</Text>
-            <ArrowRight className="absolute right-5" color={colors.surface} size={24} strokeWidth={1.8} />
-          </Pressable>
+          <View className="mt-14">
+            <Pressable
+              accessibilityRole="button"
+              accessibilityState={{ disabled: !canContinue }}
+              className={
+                canContinue
+                  ? "relative h-[54px] items-center justify-center rounded-small bg-navy"
+                  : "relative h-[54px] items-center justify-center rounded-small bg-navy opacity-40"
+              }
+              disabled={!canContinue}
+              onPress={handleContinue}
+            >
+              <Text className="font-ui-medium text-[17px] leading-6 text-surface">Continue</Text>
+              <View className="absolute right-5 top-0 h-full justify-center">
+                <ArrowRight color={colors.surface} size={28} strokeWidth={1.55} />
+              </View>
+            </Pressable>
 
-          <Pressable
-            accessibilityRole="button"
-            className="mt-5 h-12 flex-row items-center justify-center gap-2 active:opacity-60"
-            onPress={handleBack}
-          >
-            <ArrowLeft color={colors.textSecondary} size={21} strokeWidth={1.8} />
-            <Text className="font-ui-medium text-[15px] text-text-secondary">Back</Text>
-          </Pressable>
-        </ScrollView>
+            <Pressable
+              accessibilityRole="button"
+              className="mt-1.5 h-11 flex-row items-center justify-center gap-[14px]"
+              onPress={handleBack}
+            >
+              <ArrowLeft color={colors.navy} size={27} strokeWidth={1.55} />
+              <Text className="font-ui-medium text-[16px] leading-[22px] text-navy">Back</Text>
+            </Pressable>
+          </View>
+        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -234,8 +243,5 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: colors.canvas,
-  },
-  title: {
-    fontFamily: fontFamilies.editorialRegular,
   },
 });
