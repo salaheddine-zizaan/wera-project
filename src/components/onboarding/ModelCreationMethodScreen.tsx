@@ -178,7 +178,29 @@ export function ModelCreationMethodScreen() {
             </View>
           </View>
 
-          <View className="mt-1 gap-2">
+          <View className="mt-1 gap-2Read AGENTS.md and follow it strictly.
+
+The package `react-native-dynamically-selected-picker` is causing:
+
+`View config not found for component BVLinearGradient`
+
+because it depends on `react-native-linear-gradient`, which does not fit our current Expo setup.
+
+Remove:
+- react-native-dynamically-selected-picker
+- react-native-linear-gradient if it was installed only for this picker
+
+Do not change the Measurements screen design or onboarding logic.
+
+Find and recommend another horizontal wheel/number picker that:
+- works with Expo SDK 57
+- does not require unsupported native modules
+- supports horizontal scrolling
+- snaps to the centered value
+- allows custom rendering so the center value can be large/navy/100% opacity and surrounding values faded
+- works for height and weight
+
+Before installing anything, show me the recommended package and compatibility reasoning and wait for approval.">
             <MethodChoice
               description="Enter a few photos and Wera creates your model for you."
               method="photos"
