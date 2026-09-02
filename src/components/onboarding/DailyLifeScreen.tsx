@@ -1,18 +1,27 @@
 import { activityOptions, professions, usualDressingOptions } from "@/data/onboarding";
 import { useOnboardingStore } from "@/store/onboarding-store";
 import { colors } from "@/theme";
-import type { LifestyleActivityId, OnboardingOption } from "@/types/onboarding";
+import type {
+  LifestyleActivityId,
+  OnboardingOption,
+  ProfessionId,
+  UsualDressingId,
+} from "@/types/onboarding";
 
 import { useRouter } from "expo-router";
 import {
   ArrowLeft,
   ArrowRight,
+  BadgeCheck,
   BriefcaseBusiness,
+  BookOpenCheck,
   CalendarDays,
   Check,
+  CircleEllipsis,
   Dumbbell,
   GraduationCap,
   Plane,
+  Sparkles,
   Shirt,
   UsersRound,
 } from "lucide-react-native";
@@ -58,11 +67,26 @@ const activityIcons: Record<LifestyleActivityId, typeof Dumbbell> = {
   events: CalendarDays,
 };
 
+const professionIcons: Record<ProfessionId, typeof Dumbbell> = {
+  work: BriefcaseBusiness,
+  study: GraduationCap,
+  "work-and-study": BookOpenCheck,
+  other: CircleEllipsis,
+};
+
+const usualDressingIcons: Record<UsualDressingId, typeof Dumbbell> = {
+  casual: Shirt,
+  sporty: Dumbbell,
+  "smart-casual": BadgeCheck,
+  business: BriefcaseBusiness,
+  formal: Sparkles,
+};
+
 type SelectionOptionProps<Id extends string> = {
   option: OnboardingOption<Id>;
   selected: boolean;
   onPress: () => void;
-  Icon?: typeof Dumbbell;
+  Icon: typeof Dumbbell;
 };
 
 function SelectionOption<Id extends string>({
@@ -71,8 +95,6 @@ function SelectionOption<Id extends string>({
   option,
   selected,
 }: SelectionOptionProps<Id>) {
-  const OptionIcon = Icon ?? Shirt;
-
   return (
     <Pressable
       accessibilityRole="checkbox"
@@ -91,7 +113,7 @@ function SelectionOption<Id extends string>({
             : "h-11 w-11 items-center justify-center rounded-full bg-surface-secondary"
         }
       >
-        <OptionIcon color={colors.navy} size={25} strokeWidth={1.55} />
+        <Icon color={colors.navy} size={25} strokeWidth={1.55} />
       </View>
       <Text className="mt-2 text-center font-ui-medium text-[14px] leading-[19px] text-navy">
         {option.label}
@@ -187,6 +209,7 @@ export function DailyLifeScreen() {
             {question.id === "profession"
               ? professions.map((option) => (
                   <SelectionOption
+                    Icon={professionIcons[option.id]}
                     key={option.id}
                     onPress={() => updateLifestyle({ profession: option.id })}
                     option={option}
@@ -197,6 +220,7 @@ export function DailyLifeScreen() {
             {question.id === "usual-dressing"
               ? usualDressingOptions.map((option) => (
                   <SelectionOption
+                    Icon={usualDressingIcons[option.id]}
                     key={option.id}
                     onPress={() => updateLifestyle({ usualDressing: option.id })}
                     option={option}

@@ -6,7 +6,11 @@ export const images = {
   authUsernameIcon: require("../../assets/icons/auth/username-48.png"),
   authPasswordIcon: require("../../assets/icons/auth/password-50.png"),
   onboardingWelcomeWomen: require("../../assets/images/onboarding/welcome-women.png"),
+  onboardingFloatingMascot: require("../../assets/mascot/mascot-floating.png"),
   onboardingProfileWelcomeMascot: require("../../assets/mascot/mascot-welcome.png"),
   weraLogoWithName: require("../../assets/logos/wera-logo-with-name.png"),
   onboardingWelcomeMen: require("../../assets/images/onboarding/welcome-men.png"),
+  onboardingPhotoGuideModel: require("../../assets/images/onboarding/photo-guide/01-model.png"),
+  weraModelFeminineAverage: require("../../assets/wera-model/body/feminine/wera_woman_build_average.png"),
+  weraModelMasculineAverage: require("../../assets/wera-model/body/masculine/wera_man_build_average.png"),
 } as const;
