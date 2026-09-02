@@ -16,7 +16,7 @@ import type {
   WeraProfile,
 } from "@/types/profile";
 
-export const ONBOARDING_STORAGE_KEY = "wera:onboarding";
+export const ONBOARDING_STORAGE_KEY = "wera:onboarding:v2";
 
 const ONBOARDING_STEPS = [
   "about-you",
@@ -56,7 +56,7 @@ function isWeraProfile(value: unknown): value is WeraProfile {
     isRecord(basics) &&
     Array.isArray(basics.clothingDirections) &&
     isRecord(lifestyle) &&
-    Array.isArray(lifestyle.commonOccasions) &&
+    Array.isArray(lifestyle.activities) &&
     isRecord(sizesAndFit) &&
     isRecord(sizesAndFit.measurements) &&
     isRecord(model) &&

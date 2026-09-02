@@ -9,40 +9,26 @@ export type AgeRangeId =
 export type ClothingDirectionId = "womenswear" | "menswear" | "both";
 export type ModelBase = "feminine" | "masculine";
 
-export type RoutineId =
+export type ProfessionId =
   | "work"
   | "study"
   | "work-and-study"
-  | "remote-flexible"
-  | "home"
-  | "active-outdoors"
   | "other";
 
-export type EnvironmentId = "office" | "campus" | "indoors" | "outdoors" | "mixed";
-
-export type DressCodeId =
-  | "none"
-  | "relaxed"
+export type UsualDressingId =
   | "casual"
+  | "sporty"
   | "smart-casual"
   | "business"
-  | "formal"
-  | "uniform-workwear";
+  | "formal";
 
-export type ActivityLevelId = "mostly-seated" | "mixed" | "on-the-move";
-
-export type CommonOccasionId =
-  | "everyday"
-  | "work"
+export type LifestyleActivityId =
+  | "gym"
+  | "friends"
   | "classes"
-  | "errands"
-  | "social"
-  | "dinner-date"
-  | "events"
-  | "formal-events"
-  | "sport"
+  | "work"
   | "travel"
-  | "outdoors";
+  | "events";
 
 export type SizeSystemId = "EU" | "US" | "UK" | "International";
 export type ModelCreationMethod = "photos" | "manual";

@@ -1,12 +1,8 @@
 import type {
-  ActivityLevelId,
   AgeRangeId,
   BodyBuildId,
   BodyShapeId,
   ClothingDirectionId,
-  CommonOccasionId,
-  DressCodeId,
-  EnvironmentId,
   FaceShapeId,
   FacialHairId,
   FavoriteColorId,
@@ -14,11 +10,13 @@ import type {
   HairStyleId,
   ModelBase,
   ModelCreationMethod,
-  RoutineId,
+  LifestyleActivityId,
+  ProfessionId,
   SizeSystemId,
   SkinToneId,
   StyleFamily,
   TasteReaction,
+  UsualDressingId,
 } from "@/types/onboarding";
 
 export type UserBasics = {
@@ -29,11 +27,9 @@ export type UserBasics = {
 };
 
 export type UserLifestyle = {
-  routine?: RoutineId;
-  environment?: EnvironmentId;
-  dressCode?: DressCodeId;
-  activityLevel?: ActivityLevelId;
-  commonOccasions: CommonOccasionId[];
+  profession?: ProfessionId;
+  usualDressing?: UsualDressingId;
+  activities: LifestyleActivityId[];
 };
 
 export type MeasurementSystem = "metric" | "imperial";

@@ -9,11 +9,9 @@ export { hairColors } from "./hair-colors";
 export { feminineHairStyles, masculineHairStyles } from "./hair-styles";
 export { createInitialWeraProfile, initialWeraProfile } from "./initial-profile";
 export {
-  activityLevels,
-  commonOccasions,
-  dressCodes,
-  environments,
-  routines,
+  activityOptions,
+  professions,
+  usualDressingOptions,
 } from "./lifestyle";
 export { sizeSystems } from "./size-systems";
 export { skinTones } from "./skin-tones";

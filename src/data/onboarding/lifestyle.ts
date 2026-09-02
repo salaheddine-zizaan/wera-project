@@ -1,56 +1,30 @@
 import type {
-  ActivityLevelId,
-  CommonOccasionId,
-  DressCodeId,
-  EnvironmentId,
+  LifestyleActivityId,
   OnboardingOption,
-  RoutineId,
+  ProfessionId,
+  UsualDressingId,
 } from "@/types/onboarding";
 
-export const routines = [
-  { id: "work", label: "Work" },
-  { id: "study", label: "Study" },
+export const professions = [
+  { id: "work", label: "Working" },
+  { id: "study", label: "Studying" },
   { id: "work-and-study", label: "Work & study" },
-  { id: "remote-flexible", label: "Flexible / remote" },
-  { id: "home", label: "Mostly at home" },
-  { id: "active-outdoors", label: "Active / on the move" },
-  { id: "other", label: "Other" },
-] satisfies readonly OnboardingOption<RoutineId>[];
+  { id: "other", label: "Something else" },
+] satisfies readonly OnboardingOption<ProfessionId>[];
 
-export const environments = [
-  { id: "office", label: "Office" },
-  { id: "campus", label: "Campus" },
-  { id: "indoors", label: "Mostly indoors" },
-  { id: "outdoors", label: "Mostly outdoors" },
-  { id: "mixed", label: "Mixed" },
-] satisfies readonly OnboardingOption<EnvironmentId>[];
-
-export const dressCodes = [
-  { id: "none", label: "No dress code" },
-  { id: "relaxed", label: "Relaxed" },
+export const usualDressingOptions = [
   { id: "casual", label: "Casual" },
+  { id: "sporty", label: "Sporty" },
   { id: "smart-casual", label: "Smart casual" },
   { id: "business", label: "Business" },
   { id: "formal", label: "Formal" },
-  { id: "uniform-workwear", label: "Uniform / workwear" },
-] satisfies readonly OnboardingOption<DressCodeId>[];
+] satisfies readonly OnboardingOption<UsualDressingId>[];
 
-export const activityLevels = [
-  { id: "mostly-seated", label: "Mostly seated" },
-  { id: "mixed", label: "Mixed" },
-  { id: "on-the-move", label: "On the move" },
-] satisfies readonly OnboardingOption<ActivityLevelId>[];
-
-export const commonOccasions = [
-  { id: "everyday", label: "Everyday" },
-  { id: "work", label: "Work" },
+export const activityOptions = [
+  { id: "gym", label: "The gym" },
+  { id: "friends", label: "Seeing friends" },
   { id: "classes", label: "Classes" },
-  { id: "errands", label: "Errands" },
-  { id: "social", label: "Social" },
-  { id: "dinner-date", label: "Dinner / date" },
-  { id: "events", label: "Events" },
-  { id: "formal-events", label: "Formal events" },
-  { id: "sport", label: "Sport" },
+  { id: "work", label: "Work" },
   { id: "travel", label: "Travel" },
-  { id: "outdoors", label: "Outdoors" },
-] satisfies readonly OnboardingOption<CommonOccasionId>[];
+  { id: "events", label: "Events" },
+] satisfies readonly OnboardingOption<LifestyleActivityId>[];

@@ -32,7 +32,7 @@ Wera user information is organized into six domains:
 | Phase | Collect | Why |
 |---|---|---|
 | 01 About You | Name, age range, clothing/model direction | Basic personalization |
-| 02 Daily Life | Routine, environment, dress code, activity, common occasions | Recommendation context |
+| 02 Daily Life | Profession, usual dressing, and frequent activities | Recommendation context |
 | 03 Model Method | Photos or Manual | Choose Wera Model creation path |
 | 04 Wera Model | Body/model data | Preview and fit context |
 | 05 Model Reveal | Model confirmation | Validate Wera Model |
@@ -70,81 +70,47 @@ Do not collect identity information unless the product actually requires it.
 
 Lifestyle data supports recurring outfit recommendations.
 
-### Primary Routine
+Keep Daily Life to three short questions, shown one at a time. This preserves a conversational pace while gathering the context Wera needs for useful outfit recommendations.
 
-Internal IDs:
+### Profession
+
+Single choice:
 
 ```text
 work
 study
 work-and-study
-remote-flexible
-home
-active-outdoors
 other
 ```
 
-Suggested user-facing labels:
+Suggested labels: Working, Studying, Work & study, and Something else.
 
-| ID | Label |
-|---|---|
-| `work` | Work |
-| `study` | Study |
-| `work-and-study` | Work & study |
-| `remote-flexible` | Flexible / remote |
-| `home` | Mostly at home |
-| `active-outdoors` | Active / on the move |
-| `other` | Other |
+### Usual Dressing
 
-### Environment
+Single choice:
 
 ```text
-office
-campus
-indoors
-outdoors
-mixed
-```
-
-### Dress Code
-
-```text
-none
-relaxed
 casual
+sporty
 smart-casual
 business
 formal
-uniform-workwear
 ```
 
-### General Activity
-
-Reuse the same language used by Outfit Studio:
-
-```text
-mostly-seated
-mixed
-on-the-move
-```
-
-### Common Occasions
+### Frequent Activities
 
 Multi-select:
 
 ```text
-everyday
-work
+gym
+friends
 classes
-errands
-social
-dinner-date
-events
-formal-events
-sport
+work
 travel
-outdoors
+events
 ```
+
+Suggested labels: The gym, Seeing friends, Classes, Work, Travel, and Events.
 
 ---
 
@@ -639,11 +605,9 @@ WeraProfile
 │   └── modelBase
 │
 ├── lifestyle
-│   ├── routine
-│   ├── environment
-│   ├── dressCode
-│   ├── activityLevel
-│   └── commonOccasions
+│   ├── profession
+│   ├── usualDressing
+│   └── activities
 │
 ├── sizesAndFit
 │   ├── sizeSystem

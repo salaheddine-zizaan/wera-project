@@ -6,7 +6,7 @@ export function createInitialWeraProfile(): WeraProfile {
       clothingDirections: [],
     },
     lifestyle: {
-      commonOccasions: [],
+      activities: [],
     },
     sizesAndFit: {
       measurements: {},

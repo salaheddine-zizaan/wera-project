@@ -119,7 +119,7 @@ export function AboutYouScreen() {
         <View className="flex-1 px-5 pb-6 pt-4">
           <OnboardingProgress />
 
-          <Animated.View entering={reduceMotion ? undefined : FadeIn.duration(260)}>
+          <Animated.View entering={reduceMotion ? undefined : FadeIn.duration(260)} className="flex-1">
             <View className="mt-[30px]">
               <Text className="font-ui-semibold text-[12px] leading-[14px] tracking-[3.1px] text-navy">
                 LET&apos;S BEGIN
@@ -206,7 +206,7 @@ export function AboutYouScreen() {
             </View>
           </Animated.View>
 
-          <View className="mt-14">
+          <View className="mt-6">
             <Pressable
               accessibilityRole="button"
               accessibilityState={{ disabled: !canContinue }}
