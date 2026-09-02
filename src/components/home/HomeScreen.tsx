@@ -1,13 +1,15 @@
 import { colors } from "@/theme";
 
 import { useAuth } from "@clerk/expo";
-import { LogOut } from "lucide-react-native";
+import { useRouter } from "expo-router";
+import { ArrowRight, LogOut } from "lucide-react-native";
 import { useState } from "react";
 import { ActivityIndicator, Pressable, StatusBar, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export function HomeScreen() {
   const { signOut } = useAuth();
+  const router = useRouter();
   const [isSigningOut, setIsSigningOut] = useState(false);
 
   const handleLogout = async () => {
@@ -38,6 +40,14 @@ export function HomeScreen() {
             <LogOut color={colors.navy} size={19} strokeWidth={1.8} />
           )}
           <Text className="font-ui-semibold text-[15px] text-navy">Log out</Text>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          className="mt-3 h-12 self-center flex-row items-center justify-center gap-2 rounded-medium border border-border-default px-5 active:bg-surface-secondary"
+          onPress={() => router.push("/about-you")}
+        >
+          <Text className="font-ui-semibold text-[15px] text-navy">Dev: Open onboarding</Text>
+          <ArrowRight color={colors.navy} size={18} strokeWidth={1.8} />
         </Pressable>
       </View>
     </SafeAreaView>

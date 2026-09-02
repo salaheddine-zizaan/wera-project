@@ -11,6 +11,9 @@ export const images = {
   weraLogoWithName: require("../../assets/logos/wera-logo-with-name.png"),
   onboardingWelcomeMen: require("../../assets/images/onboarding/welcome-men.png"),
   onboardingPhotoGuideModel: require("../../assets/images/onboarding/photo-guide/01-model.png"),
+  onboardingModelCreationTopWear: require("../../assets/images/onboarding/model-creation/model-creation-top-wear.png"),
+  onboardingModelCreationBottomWear: require("../../assets/images/onboarding/model-creation/model-creation-bottom-wear.png"),
+  onboardingModelCreationShoes: require("../../assets/images/onboarding/model-creation/model-creation-shoes.png"),
   weraModelFeminineAverage: require("../../assets/wera-model/body/feminine/wera_woman_build_average.png"),
   weraModelMasculineAverage: require("../../assets/wera-model/body/masculine/wera_man_build_average.png"),
 } as const;
