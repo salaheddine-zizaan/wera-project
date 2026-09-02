@@ -108,6 +108,12 @@
       "sourceType": "github",
       "skillPath": "plugins/expo/skills/expo-upgrade/SKILL.md",
       "computedHash": "559b154c068eed3c19c601f74ea1a6cdb528f5b5943522a3e4d5b40ac6ef54d3"
+    },
+    "taste-skill": {
+      "source": "C:/Users/salaheddine/.codex/skills/taste-skill",
+      "sourceType": "local",
+      "skillPath": "SKILL.md",
+      "computedHash": "aa194351b246b8b4799099d4ed7b033d29eab6e6e3d58d8d2172978be7b3ec89"
     }
   }
 }
