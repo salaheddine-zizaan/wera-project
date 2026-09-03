@@ -1,12 +1,13 @@
 import {
   bodyAssetDimensions,
+  getBodyShapeAsset,
   getModelBaseForClothingDirection,
-  modelAssets,
+  type BodyShapeAsset,
 } from "@/constants/model-assets";
-import { bodyBuilds } from "@/data/onboarding";
+import { feminineBodyShapes, masculineBodyShapes } from "@/data/onboarding";
 import { useOnboardingStore } from "@/store/onboarding-store";
 import { colors, fontFamilies } from "@/theme";
-import type { BodyBuildId } from "@/types/onboarding";
+import type { BodyShapeId } from "@/types/onboarding";
 
 import { useRouter } from "expo-router";
 import { ArrowLeft, ArrowRight } from "lucide-react-native";
@@ -27,8 +28,8 @@ import Animated, {
   FadeInRight,
   FadeInUp,
   interpolate,
-  useAnimatedStyle,
   useAnimatedScrollHandler,
+  useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
   type SharedValue,
@@ -36,10 +37,9 @@ import Animated, {
 
 import { OnboardingProgress } from "./OnboardingProgress";
 
-const DEFAULT_BUILD_ID: BodyBuildId = "average";
 const BODY_ASPECT_RATIO = bodyAssetDimensions.width / bodyAssetDimensions.height;
 const CAROUSEL_ITEM_WIDTH_RATIO = 0.31;
-const BUILD_LABEL_HEIGHT = 30;
+const SHAPE_LABEL_HEIGHT = 30;
 const SELECTED_MODEL_SCALE = 1.1;
 const NEIGHBOUR_MODEL_SCALE = 0.86;
 const OUTER_MODEL_SCALE = 0.66;
@@ -47,26 +47,29 @@ const SELECTED_MODEL_OPACITY = 1;
 const NEIGHBOUR_MODEL_OPACITY = 0.6;
 const OUTER_MODEL_OPACITY = 0.24;
 
-type BuildCarouselItemProps = {
+type BodyShapeOption =
+  | (typeof masculineBodyShapes)[number]
+  | (typeof feminineBodyShapes)[number];
+
+type BodyShapeCarouselItemProps = {
+  asset: BodyShapeAsset;
   index: number;
-  modelStageHeight: number;
+  item: BodyShapeOption;
   itemWidth: number;
-  item: (typeof bodyBuilds)[number];
-  modelBase: keyof typeof modelAssets;
+  modelStageHeight: number;
   onPress: () => void;
   scrollX: SharedValue<number>;
 };
 
-function BuildCarouselItem({
+function BodyShapeCarouselItem({
+  asset,
   index,
   item,
-  modelBase,
-  modelStageHeight,
   itemWidth,
+  modelStageHeight,
   onPress,
   scrollX,
-}: BuildCarouselItemProps) {
-  const asset = modelAssets[modelBase][item.id];
+}: BodyShapeCarouselItemProps) {
   const imageStyle = useAnimatedStyle(() => {
     const distance = Math.min(Math.abs((scrollX.value - index * itemWidth) / itemWidth), 2);
     const visualScale = interpolate(
@@ -110,8 +113,8 @@ function BuildCarouselItem({
   return (
     <Animated.View style={[styles.carouselItem, { width: itemWidth }, itemStyle]}>
       <Pressable
+        accessibilityLabel={`Select ${item.label} body shape`}
         accessibilityRole="button"
-        accessibilityLabel={`Select ${item.label} build`}
         onPress={onPress}
         style={styles.carouselPressable}
       >
@@ -129,31 +132,31 @@ function BuildCarouselItem({
   );
 }
 
-export function BuildScreen() {
+export function BodyShapeScreen() {
   const router = useRouter();
-  const carouselRef = useRef<FlatList<(typeof bodyBuilds)[number]>>(null);
+  const carouselRef = useRef<FlatList<BodyShapeOption>>(null);
   const { height: windowHeight } = useWindowDimensions();
   const [carouselWidth, setCarouselWidth] = useState(0);
   const basics = useOnboardingStore((state) => state.profile.basics);
-  const savedBuild = useOnboardingStore((state) => state.profile.model.build);
-  const suggestedBuild = useOnboardingStore((state) => state.profile.model.suggestedBuild);
+  const build = useOnboardingStore((state) => state.profile.model.build);
+  const savedBodyShape = useOnboardingStore((state) => state.profile.model.bodyShape);
   const updateModel = useOnboardingStore((state) => state.updateModel);
   const setCurrentStep = useOnboardingStore((state) => state.setCurrentStep);
   const markStepCompleted = useOnboardingStore((state) => state.markStepCompleted);
   const reduceMotion = useReducedMotion();
   const modelBase = getModelBaseForClothingDirection(basics.clothingDirections);
-  const defaultBuildIndex = useMemo(() => {
-    const initialBuild = savedBuild ?? suggestedBuild ?? DEFAULT_BUILD_ID;
-    const savedIndex = bodyBuilds.findIndex((build) => build.id === initialBuild);
+  const bodyShapes = modelBase === "masculine" ? masculineBodyShapes : feminineBodyShapes;
+  const defaultBodyShapeIndex = useMemo(() => {
+    const savedIndex = bodyShapes.findIndex((bodyShape) => bodyShape.id === savedBodyShape);
 
-    return savedIndex >= 0 ? savedIndex : bodyBuilds.findIndex((build) => build.id === DEFAULT_BUILD_ID);
-  }, [savedBuild, suggestedBuild]);
-  const [selectedBuildId, setSelectedBuildId] = useState<BodyBuildId>(
-    bodyBuilds[defaultBuildIndex].id,
+    return savedIndex >= 0 ? savedIndex : 0;
+  }, [bodyShapes, savedBodyShape]);
+  const [selectedBodyShapeId, setSelectedBodyShapeId] = useState<BodyShapeId>(
+    bodyShapes[defaultBodyShapeIndex].id,
   );
-  const hasUserInteractedWithBuildRef = useRef(false);
+  const hasUserInteractedWithShapeRef = useRef(false);
   const carouselHeight = windowHeight < 720 ? 334 : 406;
-  const modelStageHeight = carouselHeight - BUILD_LABEL_HEIGHT;
+  const modelStageHeight = carouselHeight - SHAPE_LABEL_HEIGHT;
   const itemWidth = carouselWidth * CAROUSEL_ITEM_WIDTH_RATIO;
   const sideInset = (carouselWidth - itemWidth) / 2;
   const scrollX = useSharedValue(0);
@@ -164,32 +167,41 @@ export function BuildScreen() {
   });
 
   useEffect(() => {
-    setCurrentStep("build");
+    setCurrentStep("body-shape");
   }, [setCurrentStep]);
 
   useEffect(() => {
-    if (itemWidth > 0) {
-      scrollX.value = defaultBuildIndex * itemWidth;
-    }
-  }, [defaultBuildIndex, itemWidth, scrollX]);
+    const initialBodyShape = bodyShapes[defaultBodyShapeIndex];
 
-  const handleBuildChange = (index: number) => {
-    const build = bodyBuilds[index];
-
-    if (!build) {
+    if (!initialBodyShape) {
       return;
     }
 
-    const buildId = build.id;
-    setSelectedBuildId(buildId);
-    updateModel({ build: buildId, suggestedBuild: undefined });
+    setSelectedBodyShapeId(initialBodyShape.id);
+  }, [bodyShapes, defaultBodyShapeIndex]);
+
+  useEffect(() => {
+    if (itemWidth > 0) {
+      scrollX.value = defaultBodyShapeIndex * itemWidth;
+    }
+  }, [defaultBodyShapeIndex, itemWidth, scrollX]);
+
+  const handleBodyShapeChange = (index: number) => {
+    const bodyShape = bodyShapes[index];
+
+    if (!bodyShape) {
+      return;
+    }
+
+    setSelectedBodyShapeId(bodyShape.id);
+    updateModel({ bodyShape: bodyShape.id });
   };
 
-  const handleBuildPress = (index: number) => {
-    hasUserInteractedWithBuildRef.current = true;
+  const handleBodyShapePress = (index: number) => {
+    hasUserInteractedWithShapeRef.current = true;
 
-    if (bodyBuilds[index]?.id === selectedBuildId) {
-      handleBuildChange(index);
+    if (bodyShapes[index]?.id === selectedBodyShapeId) {
+      handleBodyShapeChange(index);
       return;
     }
 
@@ -197,11 +209,11 @@ export function BuildScreen() {
   };
 
   const handleMomentumScrollEnd = ({ nativeEvent }: { nativeEvent: { contentOffset: { x: number } } }) => {
-    if (!hasUserInteractedWithBuildRef.current) {
+    if (!hasUserInteractedWithShapeRef.current) {
       return;
     }
 
-    handleBuildChange(Math.round(nativeEvent.contentOffset.x / itemWidth));
+    handleBodyShapeChange(Math.round(nativeEvent.contentOffset.x / itemWidth));
   };
 
   const handleCarouselLayout = ({ nativeEvent }: LayoutChangeEvent) => {
@@ -211,21 +223,20 @@ export function BuildScreen() {
   };
 
   const handleContinue = () => {
-    updateModel({ build: selectedBuildId, suggestedBuild: undefined });
-    markStepCompleted("build");
-    setCurrentStep("body-shape");
-    router.navigate("/body-shape");
+    updateModel({ bodyShape: selectedBodyShapeId });
+    markStepCompleted("body-shape");
+    setCurrentStep("face-shape");
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={["top", "bottom"]}>
+    <SafeAreaView edges={["top", "bottom"]} style={styles.safeArea}>
       <StatusBar backgroundColor={colors.canvas} barStyle="dark-content" />
       <View style={styles.screen}>
         <OnboardingProgress />
 
         <Animated.View entering={reduceMotion ? undefined : FadeInRight.duration(260)} style={styles.header}>
           <Text style={styles.eyebrow}>YOUR WERA MODEL</Text>
-          <Text style={styles.title}>Choose your build.</Text>
+          <Text style={styles.title}>Choose your shape.</Text>
           <Text style={styles.supportingText}>Pick the closest overall shape.</Text>
         </Animated.View>
 
@@ -241,30 +252,34 @@ export function BuildScreen() {
               <Animated.FlatList
                 ref={carouselRef}
                 contentContainerStyle={{ paddingHorizontal: sideInset }}
-                data={[...bodyBuilds]}
+                data={[...bodyShapes]}
                 decelerationRate="fast"
                 disableIntervalMomentum
                 getItemLayout={(_, index) => ({ length: itemWidth, offset: itemWidth * index, index })}
                 horizontal
-                initialScrollIndex={defaultBuildIndex}
+                initialScrollIndex={defaultBodyShapeIndex}
                 keyExtractor={(item) => item.id}
                 onMomentumScrollEnd={handleMomentumScrollEnd}
                 onScroll={scrollHandler}
                 onScrollBeginDrag={() => {
-                  hasUserInteractedWithBuildRef.current = true;
+                  hasUserInteractedWithShapeRef.current = true;
                 }}
                 removeClippedSubviews={false}
-                renderItem={({ index, item }) => (
-                  <BuildCarouselItem
-                    index={index}
-                    item={item}
-                    itemWidth={itemWidth}
-                    modelBase={modelBase}
-                    modelStageHeight={modelStageHeight}
-                    onPress={() => handleBuildPress(index)}
-                    scrollX={scrollX}
-                  />
-                )}
+                renderItem={({ index, item }) => {
+                  const asset = getBodyShapeAsset(modelBase, build ?? "average", item.id);
+
+                  return asset ? (
+                    <BodyShapeCarouselItem
+                      asset={asset}
+                      index={index}
+                      item={item}
+                      itemWidth={itemWidth}
+                      modelStageHeight={modelStageHeight}
+                      onPress={() => handleBodyShapePress(index)}
+                      scrollX={scrollX}
+                    />
+                  ) : null;
+                }}
                 scrollEventThrottle={16}
                 showsHorizontalScrollIndicator={false}
                 snapToAlignment="start"
@@ -287,7 +302,7 @@ export function BuildScreen() {
           <Pressable
             accessibilityRole="button"
             onPress={() => {
-              setCurrentStep("usual-sizes");
+              setCurrentStep("build");
               router.back();
             }}
             style={styles.backButton}
@@ -324,7 +339,7 @@ const styles = StyleSheet.create({
   eyebrow: { color: colors.navy, fontFamily: fontFamilies.uiSemibold, fontSize: 11, letterSpacing: 3, lineHeight: 14 },
   header: { marginTop: 20 },
   modelImage: { position: "absolute" },
-  modelLabel: { color: colors.navy, fontFamily: fontFamilies.uiMedium, fontSize: 15, lineHeight: BUILD_LABEL_HEIGHT, textAlign: "center" },
+  modelLabel: { color: colors.navy, fontFamily: fontFamilies.uiMedium, fontSize: 15, lineHeight: SHAPE_LABEL_HEIGHT, textAlign: "center" },
   modelStage: { alignItems: "center", overflow: "visible", position: "relative", width: "100%" },
   safeArea: { backgroundColor: colors.canvas, flex: 1 },
   screen: { flex: 1, paddingBottom: 2, paddingHorizontal: 20, paddingTop: 16 },
