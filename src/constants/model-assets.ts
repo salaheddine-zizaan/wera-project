@@ -3,6 +3,7 @@ import type {
   BodyBuildId,
   BodyShapeId,
   ClothingDirectionId,
+  FaceShapeId,
   ModelBase,
 } from "@/types/onboarding";
 
@@ -14,6 +15,10 @@ export type BodyBuildAsset = {
 };
 
 export type BodyShapeAsset = BodyBuildAsset;
+
+export type FaceShapeAsset = {
+  source: number;
+};
 
 export const modelAssets = {
   feminine: {
@@ -130,6 +135,23 @@ export function getBodyShapeAsset(
 ): BodyShapeAsset | undefined {
   return bodyShapeModelAssets[modelBase][build][bodyShape];
 }
+
+export const faceShapeModelAssets = {
+  feminine: {
+    oval: { source: images.weraModelFeminineFaceOval },
+    round: { source: images.weraModelFeminineFaceRound },
+    square: { source: images.weraModelFeminineFaceSquare },
+    heart: { source: images.weraModelFeminineFaceHeart },
+    diamond: { source: images.weraModelFeminineFaceLong },
+  },
+  masculine: {
+    oval: { source: images.weraModelMasculineFaceOval },
+    round: { source: images.weraModelMasculineFaceRound },
+    square: { source: images.weraModelMasculineFaceSquare },
+    heart: { source: images.weraModelMasculineFaceHeart },
+    diamond: { source: images.weraModelMasculineFaceLong },
+  },
+} as const satisfies Record<ModelBase, Record<FaceShapeId, FaceShapeAsset>>;
 
 export const bodyAssetDimensions = {
   height: BODY_ASSET_HEIGHT,

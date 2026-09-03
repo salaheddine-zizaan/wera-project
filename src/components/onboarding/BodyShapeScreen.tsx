@@ -226,6 +226,7 @@ export function BodyShapeScreen() {
     updateModel({ bodyShape: selectedBodyShapeId });
     markStepCompleted("body-shape");
     setCurrentStep("face-shape");
+    router.navigate("/face-shape");
   };
 
   return (
