@@ -33,4 +33,5 @@ export const feminineHairStyles = [
   { id: "locs", label: "Locs", assetKey: "hair-feminine-locs" },
   { id: "bun", label: "Bun", assetKey: "hair-feminine-bun" },
   { id: "ponytail", label: "Ponytail", assetKey: "hair-feminine-ponytail" },
+  { id: "hijab", label: "Hijab", assetKey: "hair-feminine-hijab" },
 ] satisfies readonly OnboardingOption<FeminineHairStyleId>[];

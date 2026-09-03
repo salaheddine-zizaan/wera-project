@@ -4,6 +4,7 @@ import type {
   BodyShapeId,
   ClothingDirectionId,
   FaceShapeId,
+  HairStyleId,
   ModelBase,
 } from "@/types/onboarding";
 
@@ -17,6 +18,10 @@ export type BodyBuildAsset = {
 export type BodyShapeAsset = BodyBuildAsset;
 
 export type FaceShapeAsset = {
+  source: number;
+};
+
+export type HairStyleAsset = {
   source: number;
 };
 
@@ -152,6 +157,45 @@ export const faceShapeModelAssets = {
     diamond: { source: images.weraModelMasculineFaceLong },
   },
 } as const satisfies Record<ModelBase, Record<FaceShapeId, FaceShapeAsset>>;
+
+export const hairStyleModelAssets: Record<
+  ModelBase,
+  Partial<Record<HairStyleId, HairStyleAsset>>
+> = {
+  feminine: {
+    pixie: { source: images.weraModelFeminineHairPixie },
+    bob: { source: images.weraModelFeminineHairBob },
+    lob: { source: images.weraModelFeminineHairLob },
+    medium: { source: images.weraModelFeminineHairMedium },
+    long: { source: images.weraModelFeminineHairLong },
+    "short-curly": { source: images.weraModelFeminineHairShortCurly },
+    "long-curly": { source: images.weraModelFeminineHairLongCurly },
+    afro: { source: images.weraModelFeminineHairAfro },
+    braids: { source: images.weraModelFeminineHairBraids },
+    locs: { source: images.weraModelFeminineHairLocs },
+    bun: { source: images.weraModelFeminineHairBun },
+    ponytail: { source: images.weraModelFeminineHairPonytail },
+    hijab: { source: images.weraModelFeminineHairHijab },
+  },
+  masculine: {
+    bald: { source: images.weraModelMasculineHairBald },
+    buzz: { source: images.weraModelMasculineHairBuzz },
+    crop: { source: images.weraModelMasculineHairCrop },
+    fade: { source: images.weraModelMasculineHairFade },
+    textured: { source: images.weraModelMasculineHairTextured },
+    "short-curly": { source: images.weraModelMasculineHairShortCurly },
+    medium: { source: images.weraModelMasculineHairMedium },
+    long: { source: images.weraModelMasculineHairLong },
+    afro: { source: images.weraModelMasculineHairAfro },
+  },
+};
+
+export function getHairStyleAsset(
+  modelBase: ModelBase,
+  hairStyle: HairStyleId,
+): HairStyleAsset | undefined {
+  return hairStyleModelAssets[modelBase][hairStyle];
+}
 
 export const bodyAssetDimensions = {
   height: BODY_ASSET_HEIGHT,

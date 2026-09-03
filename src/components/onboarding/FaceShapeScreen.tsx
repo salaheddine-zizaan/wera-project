@@ -4,19 +4,17 @@ import {
 } from "@/constants/model-assets";
 import { faceShapes } from "@/data/onboarding";
 import { useOnboardingStore } from "@/store/onboarding-store";
-import { colors, fontFamilies } from "@/theme";
+import { colors } from "@/theme";
 import type { FaceShapeId } from "@/types/onboarding";
 
 import { useRouter } from "expo-router";
 import { ArrowLeft, ArrowRight } from "lucide-react-native";
 import { useEffect, useState } from "react";
-import { Pressable, StatusBar, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StatusBar, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Svg, { Circle, Ellipse, Path, Polygon, Rect } from "react-native-svg";
 import Animated, {
   Easing,
   FadeIn,
-  FadeInRight,
   FadeInUp,
   FadeOut,
   useReducedMotion,
@@ -26,39 +24,15 @@ import { OnboardingProgress } from "./OnboardingProgress";
 
 const DEFAULT_FACE_SHAPE_ID: FaceShapeId = "oval";
 
-type FaceShapeOutlineProps = {
-  color: string;
-  shape: FaceShapeId;
-};
-
-function FaceShapeOutline({ color, shape }: FaceShapeOutlineProps) {
-  const commonProps = { fill: "none", stroke: color, strokeWidth: 1.8 };
-
-  return (
-    <Svg accessibilityElementsHidden height={31} viewBox="0 0 32 32" width={31}>
-      {shape === "oval" ? <Ellipse {...commonProps} cx={16} cy={16} rx={9} ry={12} /> : null}
-      {shape === "round" ? <Circle {...commonProps} cx={16} cy={16} r={10} /> : null}
-      {shape === "square" ? <Rect {...commonProps} height={20} rx={3} width={20} x={6} y={6} /> : null}
-      {shape === "heart" ? (
-        <Path
-          {...commonProps}
-          d="M16 26.5 6.3 17.3A6.4 6.4 0 0 1 15.4 8l.6.7.6-.7a6.4 6.4 0 0 1 9.1 9.3Z"
-        />
-      ) : null}
-      {shape === "diamond" ? <Polygon {...commonProps} points="16,4.5 26,16 16,27.5 6,16" /> : null}
-    </Svg>
-  );
-}
-
 export function FaceShapeScreen() {
   const router = useRouter();
-  const basics = useOnboardingStore((state) => state.profile.basics);
+  const clothingDirections = useOnboardingStore((state) => state.profile.basics.clothingDirections);
   const savedFaceShape = useOnboardingStore((state) => state.profile.model.faceShape);
   const updateModel = useOnboardingStore((state) => state.updateModel);
   const setCurrentStep = useOnboardingStore((state) => state.setCurrentStep);
   const markStepCompleted = useOnboardingStore((state) => state.markStepCompleted);
   const reduceMotion = useReducedMotion();
-  const modelBase = getModelBaseForClothingDirection(basics.clothingDirections);
+  const modelBase = getModelBaseForClothingDirection(clothingDirections);
   const [selectedFaceShapeId, setSelectedFaceShapeId] = useState<FaceShapeId>(
     savedFaceShape ?? DEFAULT_FACE_SHAPE_ID,
   );
@@ -79,86 +53,125 @@ export function FaceShapeScreen() {
     updateModel({ faceShape: faceShapeId });
   };
 
+  const handleBack = () => {
+    setCurrentStep("body-shape");
+    router.back();
+  };
+
   const handleContinue = () => {
     updateModel({ faceShape: selectedFaceShapeId });
     markStepCompleted("face-shape");
     setCurrentStep("hair");
+    router.navigate("/hair");
   };
 
   return (
     <SafeAreaView edges={["top", "bottom"]} style={styles.safeArea}>
       <StatusBar backgroundColor={colors.canvas} barStyle="dark-content" />
-      <View style={styles.screen}>
+      <View className="flex-1 px-5 pb-[2px] pt-[14px]">
         <OnboardingProgress />
 
-        <Animated.View entering={reduceMotion ? undefined : FadeInRight.duration(260)} style={styles.header}>
-          <Text style={styles.eyebrow}>YOUR WERA MODEL</Text>
-          <Text style={styles.title}>Choose your face shape.</Text>
+        <Animated.View
+          className="mt-[19px]"
+          entering={reduceMotion ? undefined : FadeInUp.duration(240)}
+        >
+          <Text className="font-ui-semibold text-[11px] leading-[15px] tracking-[3.2px] text-navy">
+            YOUR WERA MODEL
+          </Text>
+          <Text className="mt-1 font-editorial-regular text-[44px] leading-[47px] tracking-[-1.1px] text-navy">
+            Choose your face shape.
+          </Text>
+          <Text className="mt-[7px] font-ui text-[15px] leading-[21px] text-text-secondary">
+            Choose the shape that feels most like you.
+          </Text>
         </Animated.View>
 
-        <Animated.View
-          entering={reduceMotion ? undefined : FadeInUp.delay(90).duration(280).easing(Easing.out(Easing.cubic))}
-          style={styles.previewStage}
-        >
+        <View className="relative flex-1 min-h-[180px] items-center justify-end overflow-hidden pt-[3px]">
+          <View
+            className="absolute bottom-0 h-[92%] w-[91%] rounded-t-[172px] bg-surface-secondary"
+            pointerEvents="none"
+          />
           <Animated.View
-            entering={reduceMotion ? undefined : FadeIn.duration(180)}
+            className="h-full w-full items-center justify-end"
+            entering={reduceMotion ? undefined : FadeIn.duration(190).easing(Easing.out(Easing.cubic))}
             exiting={reduceMotion ? undefined : FadeOut.duration(120)}
             key={selectedFaceShapeId}
-            style={styles.previewAsset}
           >
             <Animated.Image
               accessibilityLabel={`${faceShapes.find((faceShape) => faceShape.id === selectedFaceShapeId)?.label ?? "Selected"} face shape`}
+              className="h-full w-full"
               resizeMode="contain"
               source={previewAsset.source}
-              style={styles.previewImage}
             />
           </Animated.View>
-        </Animated.View>
+        </View>
 
-        <View accessibilityLabel="Face shape options" style={styles.optionRow}>
-          {faceShapes.map((faceShape) => {
-            const isSelected = faceShape.id === selectedFaceShapeId;
-            const optionColor = isSelected ? colors.navy : colors.textSecondary;
+        <View className="gap-2">
+          <View className="flex-row items-center justify-between">
+            <Text className="font-ui-semibold text-[11px] leading-[15px] tracking-[2.8px] text-navy">
+              FACE SHAPE
+            </Text>
+            <Text className="font-ui text-[12px] leading-4 text-text-secondary">Swipe to explore</Text>
+          </View>
+          <ScrollView
+            contentContainerClassName="gap-2.5 pr-5"
+            horizontal
+            showsHorizontalScrollIndicator={false}
+          >
+            {faceShapes.map((faceShape) => {
+              const isSelected = faceShape.id === selectedFaceShapeId;
+              const asset = faceShapeModelAssets[modelBase][faceShape.id];
 
-            return (
-              <Pressable
-                accessibilityLabel={`Select ${faceShape.label} face shape`}
-                accessibilityRole="button"
-                accessibilityState={{ selected: isSelected }}
-                key={faceShape.id}
-                onPress={() => handleFaceShapePress(faceShape.id)}
-                style={styles.optionButton}
-              >
-                <View style={isSelected ? styles.selectedIconWrap : undefined}>
-                  <FaceShapeOutline color={optionColor} shape={faceShape.id} />
-                </View>
-                <Text style={[styles.optionLabel, isSelected ? styles.selectedOptionLabel : undefined]}>
-                  {faceShape.label}
-                </Text>
-              </Pressable>
-            );
-          })}
+              return (
+                <Pressable
+                  accessibilityLabel={`Select ${faceShape.label} face shape`}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: isSelected }}
+                  className={`h-[105px] w-[78px] items-center justify-between overflow-hidden rounded-medium border-[1.5px] pb-2 pt-1 active:opacity-80 ${
+                    isSelected ? "border-navy bg-surface" : "border-transparent bg-surface-secondary"
+                  }`}
+                  key={faceShape.id}
+                  onPress={() => handleFaceShapePress(faceShape.id)}
+                >
+                  <Animated.Image
+                    className="-mt-[3px] h-[73px] w-[73px]"
+                    resizeMode="contain"
+                    source={asset.source}
+                  />
+                  <Text
+                    className={`w-full text-center font-ui-medium text-[12px] leading-4 ${
+                      isSelected ? "font-ui-semibold text-navy" : "text-text-secondary"
+                    }`}
+                    numberOfLines={1}
+                  >
+                    {faceShape.label}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
         </View>
 
         <Animated.View
-          entering={reduceMotion ? undefined : FadeInUp.delay(160).duration(220)}
-          style={styles.actions}
+          className="gap-px pt-3"
+          entering={reduceMotion ? undefined : FadeInUp.delay(80).duration(220)}
         >
-          <Pressable accessibilityRole="button" onPress={handleContinue} style={styles.continueButton}>
-            <View style={styles.buttonSideSpacer} />
-            <Text style={styles.continueLabel}>Continue</Text>
-            <ArrowRight color={colors.surface} size={28} strokeWidth={1.55} />
+          <Pressable
+            accessibilityRole="button"
+            className="h-[53px] flex-row items-center justify-between rounded-[13px] bg-navy px-5 active:opacity-85"
+            onPress={handleContinue}
+          >
+            <View className="w-[29px]" />
+            <Text className="font-ui-medium text-[18px] leading-6 text-surface">Continue</Text>
+            <ArrowRight color={colors.surface} size={29} strokeWidth={1.6} />
           </Pressable>
           <Pressable
             accessibilityRole="button"
-            onPress={() => {
-              setCurrentStep("body-shape");
-              router.back();
-            }}
-            style={styles.backButton}
+            className="h-[39px] flex-row items-center justify-center gap-3 active:opacity-70"
+            onPress={handleBack}
           >
-            <ArrowLeft color={colors.navy} size={27} strokeWidth={1.55} />
-            <Text style={styles.backLabel}>Back</Text>
+            <ArrowLeft color={colors.navy} size={26} strokeWidth={1.65} />
+            <Text className="font-ui-medium text-[17px] leading-[22px] text-navy">Back</Text>
           </Pressable>
         </Animated.View>
       </View>
@@ -167,31 +180,8 @@ export function FaceShapeScreen() {
 }
 
 const styles = StyleSheet.create({
-  actions: { gap: 2, paddingTop: 14 },
-  backButton: { alignItems: "center", flexDirection: "row", gap: 14, height: 44, justifyContent: "center" },
-  backLabel: { color: colors.navy, fontFamily: fontFamilies.uiMedium, fontSize: 16, lineHeight: 22 },
-  buttonSideSpacer: { width: 28 },
-  continueButton: {
-    alignItems: "center",
-    backgroundColor: colors.navy,
-    borderRadius: 10,
-    flexDirection: "row",
-    height: 54,
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
+  safeArea: {
+    backgroundColor: colors.canvas,
+    flex: 1,
   },
-  continueLabel: { color: colors.surface, fontFamily: fontFamilies.uiMedium, fontSize: 17, lineHeight: 24 },
-  eyebrow: { color: colors.navy, fontFamily: fontFamilies.uiSemibold, fontSize: 11, letterSpacing: 3, lineHeight: 14 },
-  header: { marginTop: 20 },
-  optionButton: { alignItems: "center", flex: 1, gap: 3, justifyContent: "center", minHeight: 64, paddingHorizontal: 1, paddingVertical: 4 },
-  optionLabel: { color: colors.textSecondary, fontFamily: fontFamilies.ui, fontSize: 11, lineHeight: 14, textAlign: "center" },
-  optionRow: { alignItems: "flex-start", flexDirection: "row", marginHorizontal: -4, paddingTop: 4 },
-  previewAsset: { alignItems: "center", justifyContent: "center" },
-  previewImage: { height: 264, width: 264 },
-  previewStage: { alignItems: "center", flex: 1, justifyContent: "center", minHeight: 220, paddingVertical: 10 },
-  safeArea: { backgroundColor: colors.canvas, flex: 1 },
-  screen: { flex: 1, paddingBottom: 2, paddingHorizontal: 20, paddingTop: 16 },
-  selectedIconWrap: { borderColor: colors.navy, borderRadius: 14, borderWidth: 1, padding: 4 },
-  selectedOptionLabel: { color: colors.navy, fontFamily: fontFamilies.uiSemibold },
-  title: { color: colors.navy, fontFamily: fontFamilies.editorialRegular, fontSize: 48, letterSpacing: -1, lineHeight: 50, marginTop: 3 },
 });

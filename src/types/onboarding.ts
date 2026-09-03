@@ -68,7 +68,8 @@ export type FeminineHairStyleId =
   | "braids"
   | "locs"
   | "bun"
-  | "ponytail";
+  | "ponytail"
+  | "hijab";
 export type HairStyleId = MasculineHairStyleId | FeminineHairStyleId;
 export type HairColorId =
   | "black"
