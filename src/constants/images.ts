@@ -106,4 +106,11 @@ export const images = {
   weraModelMasculineHairMedium: require("../../assets/wera-model/hair/masculine/wera_man_hair_medium.png"),
   weraModelMasculineHairLong: require("../../assets/wera-model/hair/masculine/wera_man_hair_long.png"),
   weraModelMasculineHairAfro: require("../../assets/wera-model/hair/masculine/wera_man_hair_afro.png"),
+  weraModelMasculineFacialHairNone: require("../../assets/wera-model/facial-hair/masculine/wera_man_facial_hair_none.png"),
+  weraModelMasculineFacialHairStubble: require("../../assets/wera-model/facial-hair/masculine/wera_man_facial_hair_stubble.png"),
+  weraModelMasculineFacialHairMustache: require("../../assets/wera-model/facial-hair/masculine/wera_man_facial_hair_mustache.png"),
+  weraModelMasculineFacialHairGoatee: require("../../assets/wera-model/facial-hair/masculine/wera_man_facial_hair_goatee.png"),
+  weraModelMasculineFacialHairShortBoxed: require("../../assets/wera-model/facial-hair/masculine/wera_man_facial_hair_short_boxed.png"),
+  weraModelMasculineFacialHairFullBeard: require("../../assets/wera-model/facial-hair/masculine/wera_man_facial_hair_full_beard.png"),
+  weraModelMasculineFacialHairCircleBeard: require("../../assets/wera-model/facial-hair/masculine/wera_man_facial_hair_circle_beard.png"),
 } as const;

@@ -15,7 +15,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, {
   Easing,
   FadeIn,
-  FadeInUp,
   FadeOut,
   useReducedMotion,
 } from "react-native-reanimated";
@@ -73,7 +72,7 @@ export function FaceShapeScreen() {
 
         <Animated.View
           className="mt-[19px]"
-          entering={reduceMotion ? undefined : FadeInUp.duration(240)}
+          entering={reduceMotion ? undefined : FadeIn.duration(220)}
         >
           <Text className="font-ui-semibold text-[11px] leading-[15px] tracking-[3.2px] text-navy">
             YOUR WERA MODEL
@@ -154,7 +153,7 @@ export function FaceShapeScreen() {
 
         <Animated.View
           className="gap-px pt-3"
-          entering={reduceMotion ? undefined : FadeInUp.delay(80).duration(220)}
+          entering={reduceMotion ? undefined : FadeIn.delay(80).duration(200)}
         >
           <Pressable
             accessibilityRole="button"

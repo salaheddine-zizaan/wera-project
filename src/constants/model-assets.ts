@@ -4,6 +4,7 @@ import type {
   BodyShapeId,
   ClothingDirectionId,
   FaceShapeId,
+  FacialHairId,
   HairStyleId,
   ModelBase,
 } from "@/types/onboarding";
@@ -24,6 +25,8 @@ export type FaceShapeAsset = {
 export type HairStyleAsset = {
   source: number;
 };
+
+export type FacialHairAsset = HairStyleAsset;
 
 export const modelAssets = {
   feminine: {
@@ -195,6 +198,20 @@ export function getHairStyleAsset(
   hairStyle: HairStyleId,
 ): HairStyleAsset | undefined {
   return hairStyleModelAssets[modelBase][hairStyle];
+}
+
+export const facialHairModelAssets = {
+  none: { source: images.weraModelMasculineFacialHairNone },
+  stubble: { source: images.weraModelMasculineFacialHairStubble },
+  mustache: { source: images.weraModelMasculineFacialHairMustache },
+  goatee: { source: images.weraModelMasculineFacialHairGoatee },
+  "short-boxed": { source: images.weraModelMasculineFacialHairShortBoxed },
+  "full-beard": { source: images.weraModelMasculineFacialHairFullBeard },
+  "circle-beard": { source: images.weraModelMasculineFacialHairCircleBeard },
+} as const satisfies Record<FacialHairId, FacialHairAsset>;
+
+export function getFacialHairAsset(facialHair: FacialHairId): FacialHairAsset {
+  return facialHairModelAssets[facialHair];
 }
 
 export const bodyAssetDimensions = {
