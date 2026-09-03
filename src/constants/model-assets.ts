@@ -7,6 +7,7 @@ import type {
   FacialHairId,
   HairStyleId,
   ModelBase,
+  SkinToneId,
 } from "@/types/onboarding";
 
 const BODY_ASSET_HEIGHT = 1536;
@@ -27,6 +28,10 @@ export type HairStyleAsset = {
 };
 
 export type FacialHairAsset = HairStyleAsset;
+
+export type SkinToneAsset = {
+  source: number;
+};
 
 export const modelAssets = {
   feminine: {
@@ -212,6 +217,33 @@ export const facialHairModelAssets = {
 
 export function getFacialHairAsset(facialHair: FacialHairId): FacialHairAsset {
   return facialHairModelAssets[facialHair];
+}
+
+export const skinToneModelAssets = {
+  feminine: {
+    "tone-01": { source: images.weraModelFeminineSkinTone01 },
+    "tone-02": { source: images.weraModelFeminineSkinTone02 },
+    "tone-03": { source: images.weraModelFeminineSkinTone03 },
+    "tone-04": { source: images.weraModelFeminineSkinTone04 },
+    "tone-05": { source: images.weraModelFeminineSkinTone05 },
+    "tone-06": { source: images.weraModelFeminineSkinTone06 },
+    "tone-07": { source: images.weraModelFeminineSkinTone07 },
+    "tone-08": { source: images.weraModelFeminineSkinTone08 },
+  },
+  masculine: {
+    "tone-01": { source: images.weraModelMasculineSkinTone01 },
+    "tone-02": { source: images.weraModelMasculineSkinTone02 },
+    "tone-03": { source: images.weraModelMasculineSkinTone03 },
+    "tone-04": { source: images.weraModelMasculineSkinTone04 },
+    "tone-05": { source: images.weraModelMasculineSkinTone05 },
+    "tone-06": { source: images.weraModelMasculineSkinTone06 },
+    "tone-07": { source: images.weraModelMasculineSkinTone07 },
+    "tone-08": { source: images.weraModelMasculineSkinTone08 },
+  },
+} as const satisfies Record<ModelBase, Record<SkinToneId, SkinToneAsset>>;
+
+export function getSkinToneModelAsset(modelBase: ModelBase, skinTone: SkinToneId): SkinToneAsset {
+  return skinToneModelAssets[modelBase][skinTone];
 }
 
 export const bodyAssetDimensions = {
