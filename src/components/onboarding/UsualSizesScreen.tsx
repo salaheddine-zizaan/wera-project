@@ -73,7 +73,8 @@ function SizeCard({ onSelect, section, selectedSize }: SizeCardProps) {
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           className="absolute inset-0"
-        />      </StyledBlurTargetView>
+        />
+      </StyledBlurTargetView>
 
       <View className="relative z-20 px-3.5 pt-2.5 bg-black/25">
         <Text className="font-editorial-regular text-[27px] leading-[29px] text-surface">{section.label}</Text>
@@ -82,16 +83,16 @@ function SizeCard({ onSelect, section, selectedSize }: SizeCardProps) {
         </Text>
       </View>
 
-      <View className="absolute bottom-2 left-2.5 right-2.5 z-20 overflow-hidden rounded-[12px] border border-white/50 bg-white/50">
+      <View className="absolute bottom-2 left-2.5 right-2.5 z-20 overflow-hidden rounded-[12px] border border-white/50 bg-white/30">
         <BlurView
           blurMethod="dimezisBlurView"
           blurReductionFactor={1}
           blurTarget={blurTargetRef}
-          intensity={15}
+          intensity={6}
           tint="light"
         >
           <ScrollView
-            contentContainerClassName="min-w-full flex-row justify-between px-1 py-0.5 bg-white/15"
+            contentContainerClassName="min-w-full flex-row justify-between px-1 py-0.5 bg-white/35"
             directionalLockEnabled
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -139,6 +140,7 @@ export function UsualSizesScreen() {
     updateSizesAndFit({ bottomSize, shoeSize, topSize });
     markStepCompleted("usual-sizes");
     setCurrentStep("build");
+    router.navigate("/build");
   };
 
   return (

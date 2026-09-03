@@ -1,3 +1,4 @@
+import { suggestBuildFromMeasurements } from "@/lib/model-build-suggestion";
 import { useOnboardingStore } from "@/store/onboarding-store";
 import { colors, fontFamilies } from "@/theme";
 import type { LengthMeasurement, WeightMeasurement } from "@/types/profile";
@@ -177,7 +178,9 @@ function ContinueButton({ onPress }: { onPress: () => void }) {
 export function MeasurementsScreen() {
   const router = useRouter();
   const sizesAndFit = useOnboardingStore((state) => state.profile.sizesAndFit);
+  const savedBuild = useOnboardingStore((state) => state.profile.model.build);
   const updateSizesAndFit = useOnboardingStore((state) => state.updateSizesAndFit);
+  const updateModel = useOnboardingStore((state) => state.updateModel);
   const setCurrentStep = useOnboardingStore((state) => state.setCurrentStep);
   const markStepCompleted = useOnboardingStore((state) => state.markStepCompleted);
   const reduceMotion = useReducedMotion();
@@ -189,13 +192,20 @@ export function MeasurementsScreen() {
   }, [setCurrentStep]);
 
   const handleContinue = () => {
+    const measurements = {
+      height: { unit: "cm" as const, value: height },
+      weight: { unit: "kg" as const, value: weight },
+    };
+
     updateSizesAndFit({
       measurementSystem: "metric",
-      measurements: {
-        height: { unit: "cm", value: height },
-        weight: { unit: "kg", value: weight },
-      },
+      measurements,
     });
+
+    if (!savedBuild) {
+      updateModel({ suggestedBuild: suggestBuildFromMeasurements(measurements) });
+    }
+
     markStepCompleted("measurements");
     router.navigate("/usual-sizes");
   };

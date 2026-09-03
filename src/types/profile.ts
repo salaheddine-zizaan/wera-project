@@ -74,6 +74,7 @@ export type SizesAndFit = {
 export type WeraModel = {
   creationMethod?: ModelCreationMethod;
   build?: BodyBuildId;
+  suggestedBuild?: BodyBuildId;
   bodyShape?: BodyShapeId;
   faceShape?: FaceShapeId;
   hairStyle?: HairStyleId;
